@@ -122,8 +122,8 @@ class OxyZenApp:
         # Dernière notification pour snooze
         self.last_notification = None
         
-        # Référence au job de notification pour tracking
-        self.notification_schedule_job = None
+        # Liste des jobs de notification pour tracking
+        self.notification_jobs = []
         
         print("🧘 Oxy-Zen démarré!")
     
@@ -234,7 +234,21 @@ class OxyZenApp:
     def setup_schedule(self):
         """Configure les tâches planifiées."""
         # Notifications toutes les 30 minutes entre 7h30 et 16h, lun-ven
-        self.notification_schedule_job = schedule.every(30).minutes.do(self.notification_job)
+        # Programmer à des heures fixes au lieu d'un intervalle
+        notification_times = []
+        hour = 7
+        minute = 30
+        while hour < 16 or (hour == 16 and minute == 0):
+            time_str = f"{hour:02d}:{minute:02d}"
+            notification_times.append(time_str)
+            job = schedule.every().day.at(time_str).do(self.notification_job)
+            self.notification_jobs.append(job)
+            
+            # Incrémenter de 30 minutes
+            minute += 30
+            if minute >= 60:
+                minute = 0
+                hour += 1
         
         # Check-in quotidien une fois par jour (heure aléatoire entre 10h et 14h)
         checkin_hour = random.randint(10, 13)
@@ -242,10 +256,7 @@ class OxyZenApp:
         checkin_time = f"{checkin_hour:02d}:{checkin_minute:02d}"
         schedule.every().day.at(checkin_time).do(self.checkin_job)
         
-        # Forcer le calcul du next_run en appelant run_pending une fois
-        schedule.run_pending()
-        
-        print(f"📅 Notifications: toutes les 30 min (7h30-16h, lun-ven)")
+        print(f"📅 Notifications programmées: {', '.join(notification_times)}")
         print(f"📅 Check-in quotidien: {checkin_time}")
     
     def should_run_now(self) -> bool:
@@ -266,8 +277,9 @@ class OxyZenApp:
     def schedule_loop(self):
         """Boucle principale du scheduler."""
         while self.running:
-            # Ne vérifier les jobs que pendant les heures de travail
-            if self.should_run_now():
+            # Ne vérifier les jobs que les jours de semaine
+            now = datetime.now()
+            if now.weekday() < 5:  # Lundi à vendredi seulement
                 schedule.run_pending()
             
             time.sleep(60)  # Vérifier toutes les minutes
@@ -340,39 +352,41 @@ class OxyZenApp:
                     return f"En pause jusqu'à {self.pause_until.strftime('%H:%M')}"
                 return "En pause"
             
-            # Vérifier si on est dans les horaires de travail
-            if not self.should_run_now():
-                # Calculer la prochaine heure de travail
-                if now.weekday() >= 5:  # Weekend
-                    days_until_monday = 7 - now.weekday()
-                    next_work_day = now + timedelta(days=days_until_monday)
-                    next_work_day = next_work_day.replace(hour=7, minute=30, second=0, microsecond=0)
-                    return f"Lun {next_work_day.strftime('%H:%M')}"
+            # Vérifier si on est dans un jour de travail
+            if now.weekday() >= 5:  # Weekend
+                days_until_monday = 7 - now.weekday()
+                next_work_day = now + timedelta(days=days_until_monday)
+                next_work_day = next_work_day.replace(hour=7, minute=30, second=0, microsecond=0)
+                return f"Lun {next_work_day.strftime('%H:%M')}"
+            
+            # Trouver la prochaine notification parmi les jobs sauvegardés
+            next_times = []
+            for job in self.notification_jobs:
+                if job.next_run:
+                    next_times.append(job.next_run)
+            
+            if next_times:
+                next_run = min(next_times)
+                # Si c'est aujourd'hui, afficher juste l'heure
+                if next_run.date() == now.date():
+                    return next_run.strftime('%H:%M')
                 else:
-                    # Après 16h ou avant 7h30
-                    current_time = now.time()
-                    if current_time >= dt_time(16, 0):
-                        # Demain matin
-                        tomorrow = now + timedelta(days=1)
-                        tomorrow = tomorrow.replace(hour=7, minute=30, second=0, microsecond=0)
-                        return f"Demain {tomorrow.strftime('%H:%M')}"
-                    else:
-                        # Aujourd'hui à 7h30
-                        return "07:30"
+                    return f"Demain {next_run.strftime('%H:%M')}"
             
-            # On est dans les horaires de travail, utiliser le job scheduler
-            if self.notification_schedule_job and self.notification_schedule_job.next_run:
-                return self.notification_schedule_job.next_run.strftime('%H:%M')
+            # Fallback: calculer manuellement la prochaine heure fixe
+            current_time = now.time()
+            # Liste des heures de notification
+            notification_hours = [(7, 30), (8, 0), (8, 30), (9, 0), (9, 30), (10, 0), (10, 30),
+                                   (11, 0), (11, 30), (12, 0), (12, 30), (13, 0), (13, 30),
+                                   (14, 0), (14, 30), (15, 0), (15, 30), (16, 0)]
             
-            # Fallback: calculer manuellement la prochaine notification (toutes les 30 min)
-            # Arrondir à la prochaine demi-heure
-            current_minute = now.minute
-            if current_minute < 30:
-                next_time = now.replace(minute=30, second=0, microsecond=0)
-            else:
-                next_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+            for h, m in notification_hours:
+                notif_time = dt_time(h, m)
+                if current_time < notif_time:
+                    return f"{h:02d}:{m:02d}"
             
-            return next_time.strftime('%H:%M')
+            # Si après 16h, retourner demain 7h30
+            return "Demain 07:30"
             
         except Exception as e:
             print(f"❌ Erreur calcul prochaine notification: {e}")
