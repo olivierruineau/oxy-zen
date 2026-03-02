@@ -122,6 +122,9 @@ class OxyZenApp:
         # Dernière notification pour snooze
         self.last_notification = None
         
+        # Référence au job de notification pour tracking
+        self.notification_schedule_job = None
+        
         print("🧘 Oxy-Zen démarré!")
     
     def send_notification(self, category: str, message: str, exercise: str):
@@ -141,11 +144,8 @@ class OxyZenApp:
             # Son plus audible pour attirer l'attention
             notif.set_audio(audio.Reminder, loop=False)
             
-            # Ajouter boutons d'action
-            notif.add_actions(label="Snooze 5 min", launch="snooze:")
-            notif.add_actions(label="Fait ✓", launch="done:")
-            
-            # Afficher
+            # Afficher (sans boutons d'action pour éviter les erreurs de protocole Windows)
+            # Utiliser le menu système pour Snooze au lieu des actions de notification
             notif.show()
             
             # Statistiques
@@ -234,13 +234,16 @@ class OxyZenApp:
     def setup_schedule(self):
         """Configure les tâches planifiées."""
         # Notifications toutes les 30 minutes entre 7h30 et 16h, lun-ven
-        schedule.every(30).minutes.do(self.notification_job)
+        self.notification_schedule_job = schedule.every(30).minutes.do(self.notification_job)
         
         # Check-in quotidien une fois par jour (heure aléatoire entre 10h et 14h)
         checkin_hour = random.randint(10, 13)
         checkin_minute = random.randint(0, 59)
         checkin_time = f"{checkin_hour:02d}:{checkin_minute:02d}"
         schedule.every().day.at(checkin_time).do(self.checkin_job)
+        
+        # Forcer le calcul du next_run en appelant run_pending une fois
+        schedule.run_pending()
         
         print(f"📅 Notifications: toutes les 30 min (7h30-16h, lun-ven)")
         print(f"📅 Check-in quotidien: {checkin_time}")
@@ -325,6 +328,58 @@ class OxyZenApp:
         
         return img
     
+    def get_next_notification_time(self) -> Optional[str]:
+        """Retourne l'heure de la prochaine notification formatée."""
+        try:
+            from datetime import timedelta
+            now = datetime.now()
+            
+            # Si en pause, afficher jusqu'à quand
+            if self.paused or (self.pause_until and now < self.pause_until):
+                if self.pause_until:
+                    return f"En pause jusqu'à {self.pause_until.strftime('%H:%M')}"
+                return "En pause"
+            
+            # Vérifier si on est dans les horaires de travail
+            if not self.should_run_now():
+                # Calculer la prochaine heure de travail
+                if now.weekday() >= 5:  # Weekend
+                    days_until_monday = 7 - now.weekday()
+                    next_work_day = now + timedelta(days=days_until_monday)
+                    next_work_day = next_work_day.replace(hour=7, minute=30, second=0, microsecond=0)
+                    return f"Lun {next_work_day.strftime('%H:%M')}"
+                else:
+                    # Après 16h ou avant 7h30
+                    current_time = now.time()
+                    if current_time >= dt_time(16, 0):
+                        # Demain matin
+                        tomorrow = now + timedelta(days=1)
+                        tomorrow = tomorrow.replace(hour=7, minute=30, second=0, microsecond=0)
+                        return f"Demain {tomorrow.strftime('%H:%M')}"
+                    else:
+                        # Aujourd'hui à 7h30
+                        return "07:30"
+            
+            # On est dans les horaires de travail, utiliser le job scheduler
+            if self.notification_schedule_job and self.notification_schedule_job.next_run:
+                return self.notification_schedule_job.next_run.strftime('%H:%M')
+            
+            # Fallback: calculer manuellement la prochaine notification (toutes les 30 min)
+            # Arrondir à la prochaine demi-heure
+            current_minute = now.minute
+            if current_minute < 30:
+                next_time = now.replace(minute=30, second=0, microsecond=0)
+            else:
+                next_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+            
+            return next_time.strftime('%H:%M')
+            
+        except Exception as e:
+            print(f"❌ Erreur calcul prochaine notification: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
     def update_icon_menu(self):
         """Met à jour le menu de l'icône."""
         if self.icon:
@@ -334,10 +389,13 @@ class OxyZenApp:
         """Crée le menu de l'icône système."""
         status = "⏸️ EN PAUSE" if self.paused else "✅ Actif"
         areas = ", ".join(self.preferences.problem_areas) if self.preferences.problem_areas else "Aucune"
+        next_notif = self.get_next_notification_time()
+        next_notif_text = f"Prochaine: {next_notif}" if next_notif else "Prochaine: --"
         
         return Menu(
             MenuItem(f"Status: {status}", None, enabled=False),
             MenuItem(f"Zones: {areas}", None, enabled=False),
+            MenuItem(next_notif_text, None, enabled=False),
             Menu.SEPARATOR,
             MenuItem("Déclencher notification", lambda: self.trigger_notification_now()),
             MenuItem("Snooze 5 min", lambda: self.snooze_notification(), enabled=self.last_notification is not None),
