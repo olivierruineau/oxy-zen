@@ -1,0 +1,13 @@
+[project]
+name = "oxy-zen"
+version = "0.1.0"
+description = "Application de rappels d'exercices adaptative pour journée de travail"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "winotify>=1.1.0",
+    "schedule>=1.2.0",
+    "pystray>=0.19.0",
+    "pillow>=10.0.0",
+    "pyyaml>=6.0.0",
+]

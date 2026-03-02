@@ -1,0 +1,147 @@
+# Messages d'exercices par catégorie pour Oxy-Zen
+# Format: message sarcastique + instruction d'exercice
+
+dos:
+  - message: "Ton dos appelle son avocat 🦴"
+    exercise: "Étire-toi en arrière pendant 30 secondes, mains sur les hanches"
+  
+  - message: "T'as le dos d'un Tetris mal joué"
+    exercise: "Rotations des épaules : 10x en avant, 10x en arrière"
+  
+  - message: "Ton dos te déteste autant que tu détestes les réunions Zoom"
+    exercise: "Enroule et déroule ton dos vertèbre par vertèbre, debout"
+  
+  - message: "Cette posture devrait être illégale 🚨"
+    exercise: "Étirement chat-vache : à genoux, alterne dos rond et dos creux, 8x"
+  
+  - message: "Même une huître a une meilleure colonne vertébrale"
+    exercise: "Torsion assise : tourne ton buste à gauche puis à droite, 30s chaque"
+  
+  - message: "Ta vertèbre L4 vient de démissionner"
+    exercise: "Étirement lombaires : debout, penche-toi sur le côté, 20s x 2"
+  
+  - message: "Quasimodo appelé, il veut récupérer sa posture"
+    exercise: "Ouvre ta poitrine : mains derrière la tête, pousse les coudes en arrière"
+
+yeux:
+  - message: "Tes yeux méritent mieux que cet écran 👀"
+    exercise: "Règle 20-20-20 : regarde à 6 mètres pendant 20 secondes"
+  
+  - message: "Arrête de fixer l'écran comme si c'était une pizza"
+    exercise: "Ferme les yeux et masse tes tempes en cercles pendant 30s"
+  
+  - message: "Tes yeux sont plus secs que l'humour de ton chef"
+    exercise: "Cligne des yeux consciemment 20 fois, lentement"
+  
+  - message: "Tu fixes l'écran comme si t'attendais qu'il cligne en premier"
+    exercise: "Regarde au loin par la fenêtre, cherche quelque chose de vert"
+  
+  - message: "Même ta webcam a pitié de tes yeux 📷"
+    exercise: "Palming : frotte tes mains et pose-les sur tes yeux fermés, 1 minute"
+  
+  - message: "Tes yeux ont plus besoin d'une pause que ton café"
+    exercise: "Regarde en haut, bas, gauche, droite - 5x chaque direction"
+  
+  - message: "Ton ophtalmo pleure en pensant à toi"
+    exercise: "Focus proche/loin : alterne entre ton doigt à 20cm et un objet lointain"
+
+jambes:
+  - message: "Tes jambes ont oublié qu'elles servent à marcher 🦵"
+    exercise: "Lève-toi et marche 2 minutes, fais un tour du bureau/appart"
+  
+  - message: "Ta circulation sanguine a pris sa retraite"
+    exercise: "Debout, monte sur la pointe des pieds 20x"
+  
+  - message: "Tes mollets se demandent s'ils existent encore"
+    exercise: "Assis, étire une jambe et ramène tes orteils vers toi, 30s x 2"
+  
+  - message: "T'es planté comme un cactus, mais en moins mobile"
+    exercise: "Squats légers contre ton bureau : 10 répétitions"
+  
+  - message: "Tes chevilles sont aussi raides qu'un PowerPoint corporate"
+    exercise: "Tourne tes chevilles dans les deux sens, 10 rotations chaque"
+  
+  - message: "Thrombose veineuse entered the chat 💀"
+    exercise: "Marche sur place pendant 1 minute, monte bien les genoux"
+  
+  - message: "Tes jambes vivent leur pire cauchemar existentiel"
+    exercise: "Fentes alternées : 8 répétitions (ou 4 si t'es vraiment mort)"
+
+posture:
+  - message: "Ta posture ferait pleurer un prof de yoga 🧘"
+    exercise: "Redresse-toi : épaules en arrière, menton rentré, tiens 1 minute"
+  
+  - message: "T'es assis comme un sac de patates, mais en moins digne"
+    exercise: "Ajuste ta chaise : pieds à plat, dos droit, écran à hauteur des yeux"
+  
+  - message: "Ton ostéopathe vient de s'acheter une nouvelle voiture grâce à toi"
+    exercise: "Presse tes omoplates ensemble pendant 10s, relâche. Répète 5x"
+  
+  - message: "C'est pas un cou, c'est un point d'interrogation"
+    exercise: "Menton vers la poitrine, puis regarde le plafond, alterne 8x"
+  
+  - message: "Ta nuque crie à l'aide en silence"
+    exercise: "Incline ta tête à gauche, à droite, tiens 20s chaque côté"
+  
+  - message: "T'as la posture d'un shrimp qui aurait abandonné"
+    exercise: "Contre le mur : talons, fesses, épaules et tête collés, 1 minute"
+
+respiration:
+  - message: "Tu respires ou tu survives? 😮‍💨"
+    exercise: "Respiration 4-7-8 : inspire 4s, retiens 7s, expire 8s, x3"
+  
+  - message: "Tes poumons aimeraient participer à ta journée"
+    exercise: "Respiration ventrale : main sur le ventre, inspire profondément 5x"
+  
+  - message: "C'est pas une respiration, c'est un soupir existentiel"
+    exercise: "Debout, bras vers le ciel en inspirant, descends en expirant, x5"
+  
+  - message: "Ton diaphragme a envoyé sa lettre de démission"
+    exercise: "Boxe respiration : inspire 4 temps, retiens 4, expire 4, retiens 4"
+  
+  - message: "Respire, même Excel le fait mieux que toi"
+    exercise: "Narine alternée : bouche droite, inspire gauche, alterne, x6"
+  
+  - message: "Ta respiration est plus courte qu'un sprint de 100m"
+    exercise: "Respiration complète : inspire par le ventre puis la poitrine, 8x"
+
+fatigue_generale:
+  - message: "T'as l'énergie d'un escargot sous antidépresseurs 🐌"
+    exercise: "Secoue tout ton corps vigoureusement pendant 30 secondes"
+  
+  - message: "Ta batterie est à 3%, branche-toi à la vie"
+    exercise: "Étirements complets : bras vers le ciel, penche-toi en avant, 1 min"
+  
+  - message: "Même ton café a abandonné l'espoir de te réveiller"
+    exercise: "Jumping jacks ou montées de genoux rapides : 20 répétitions"
+  
+  - message: "T'as la vivacité d'un sloth en vacances"
+    exercise: "Tape dans tes mains, secoue tes bras, réveille-toi!"
+  
+  - message: "Windows a plus d'énergie que toi (et c'est triste)"
+    exercise: "Va boire de l'EAU (pas du café), marche jusqu'à la cuisine"
+  
+  - message: "Tu fonctionnes au ralenti, comme IE en 2005"
+    exercise: "Auto-massage : nuque, épaules, visage, 1 minute"
+
+prevention_globale:
+  - message: "Checkpoint santé : t'es vivant? Prouve-le 💪"
+    exercise: "Routine express : étire bras, jambes, dos, secoue tout, 2 min"
+  
+  - message: "Ton corps a besoin d'amour, genre maintenant"
+    exercise: "Étirements doux de tout le corps, respire profondément"
+  
+  - message: "Pause obligatoire : ton futur toi te remercie"
+    exercise: "Lève-toi, marche, bois de l'eau, respire. C'est tout."
+  
+  - message: "Tu mérites mieux qu'une vie de statue 🗿"
+    exercise: "Mobilité générale : rotations des articulations principales"
+  
+  - message: "Check ta posture, ton hydratation, ta vie"
+    exercise: "Mini routine : dos droit, 3 respirations profondes, étire les bras"
+  
+  - message: "C'est l'heure du mouvement, pas de la méditation de bureau"
+    exercise: "Fais le tour de ta pièce en marchant consciemment"
+  
+  - message: "Ton corps n'est pas un meuble, traite-le mieux"
+    exercise: "Secoue, respire, étire ce que tu veux - mais fais quelque chose!"
