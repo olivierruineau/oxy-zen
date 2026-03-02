@@ -119,21 +119,31 @@ class OxyZenApp:
         # Icône système
         self.icon = None
         
+        # Dernière notification pour snooze
+        self.last_notification = None
+        
         print("🧘 Oxy-Zen démarré!")
     
     def send_notification(self, category: str, message: str, exercise: str):
         """Envoie une notification Windows."""
         try:
+            # Sauvegarder pour le snooze
+            self.last_notification = (category, message, exercise)
+            
             notif = Notification(
                 app_id="Oxy-Zen",
                 title=message,
                 msg=exercise,
-                duration="short",
+                duration="long",  # "long" au lieu de "short" pour plus de visibilité
                 icon=str(Path(__file__).parent / "icon.png") if (Path(__file__).parent / "icon.png").exists() else ""
             )
             
-            # Son discret
-            notif.set_audio(audio.Default, loop=False)
+            # Son plus audible pour attirer l'attention
+            notif.set_audio(audio.Reminder, loop=False)
+            
+            # Ajouter boutons d'action
+            notif.add_actions(label="Snooze 5 min", launch="snooze:")
+            notif.add_actions(label="Fait ✓", launch="done:")
             
             # Afficher
             notif.show()
@@ -142,10 +152,27 @@ class OxyZenApp:
             self.preferences.increment_notification_count()
             self.preferences.add_exercise_to_history(category, message)
             
+            # Mettre à jour le menu pour activer le bouton snooze
+            self.update_icon_menu()
+            
             print(f"📬 Notification envoyée: {message}")
             
         except Exception as e:
             print(f"❌ Erreur notification: {e}")
+    
+    def snooze_notification(self):
+        """Rappelle la dernière notification après 5 minutes."""
+        if self.last_notification:
+            category, message, exercise = self.last_notification
+            print("⏰ Snooze - notification dans 5 minutes")
+            
+            def send_snooze():
+                time.sleep(300)  # 5 minutes
+                if not self.paused:
+                    self.send_notification(category, message, exercise)
+            
+            snooze_thread = threading.Thread(target=send_snooze, daemon=True)
+            snooze_thread.start()
     
     def notification_job(self):
         """Job de notification (appelé par le scheduler)."""
@@ -267,6 +294,16 @@ class OxyZenApp:
         print("▶️  Reprise")
         self.update_icon_menu()
     
+    def trigger_notification_now(self):
+        """Déclenche une notification immédiatement sur demande."""
+        result = self.selector.select_next_exercise()
+        if result:
+            category, message, exercise = result
+            self.send_notification(category, message, exercise)
+            print("🔔 Notification déclenchée manuellement")
+        else:
+            print("❌ Impossible de sélectionner un exercice")
+    
     def quit_app(self, icon=None, item=None):
         """Quitte l'application."""
         print("👋 Arrêt d'Oxy-Zen")
@@ -302,6 +339,8 @@ class OxyZenApp:
             MenuItem(f"Status: {status}", None, enabled=False),
             MenuItem(f"Zones: {areas}", None, enabled=False),
             Menu.SEPARATOR,
+            MenuItem("Déclencher notification", lambda: self.trigger_notification_now()),
+            MenuItem("Snooze 5 min", lambda: self.snooze_notification(), enabled=self.last_notification is not None),
             MenuItem("Check-in manuel", lambda: self.show_checkin()),
             MenuItem("Voir statistiques", lambda: self.show_stats()),
             Menu.SEPARATOR,
