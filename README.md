@@ -87,7 +87,7 @@ dos:
     exercise: "Instructions de l'exercice ici"
 ```
 
-Catégories disponibles :
+Catégories disponibles : 
 - `dos` : Exercices pour le dos et lombaires
 - `yeux` : Exercices pour les yeux et fatigue oculaire
 - `jambes` : Exercices pour les jambes et circulation
