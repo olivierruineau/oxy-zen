@@ -8,6 +8,8 @@ import random
 import schedule
 import time
 import threading
+import ctypes
+from ctypes import wintypes
 from pathlib import Path
 from datetime import datetime, time as dt_time
 from typing import Dict, List, Optional, Tuple
@@ -18,6 +20,43 @@ from PIL import Image, ImageDraw
 
 from .config import UserPreferences
 from .ui import show_checkin_dialog, show_stats_window
+
+
+def get_idle_duration() -> int:
+    """Retourne le temps d'inactivité en secondes (Windows API)."""
+    try:
+        class LASTINPUTINFO(ctypes.Structure):
+            _fields_ = [
+                ('cbSize', wintypes.UINT),
+                ('dwTime', wintypes.DWORD),
+            ]
+
+        lastInputInfo = LASTINPUTINFO()
+        lastInputInfo.cbSize = ctypes.sizeof(LASTINPUTINFO)
+        
+        if ctypes.windll.user32.GetLastInputInfo(ctypes.byref(lastInputInfo)):
+            millis = ctypes.windll.kernel32.GetTickCount() - lastInputInfo.dwTime
+            return millis / 1000.0  # Convertir en secondes
+        else:
+            return 0
+    except Exception as e:
+        print(f"❌ Erreur détection inactivité: {e}")
+        return 0
+
+
+def is_session_locked() -> bool:
+    """Détecte si la session Windows est verrouillée."""
+    try:
+        # OpenInputDesktop retourne NULL si le desktop est verrouillé
+        hDesktop = ctypes.windll.user32.OpenInputDesktop(0, False, 0)
+        if hDesktop == 0:
+            return True  # Session verrouillée
+        else:
+            ctypes.windll.user32.CloseDesktop(hDesktop)
+            return False  # Session active
+    except Exception as e:
+        print(f"❌ Erreur détection verrouillage: {e}")
+        return False
 
 
 class ExerciseSelector:
@@ -125,6 +164,9 @@ class OxyZenApp:
         # Liste des jobs de notification pour tracking
         self.notification_jobs = []
         
+        # Seuil d'inactivité (en secondes) avant de considérer l'utilisateur absent
+        self.idle_threshold = 300  # 5 minutes par défaut
+        
         print("🧘 Oxy-Zen démarré!")
     
     def send_notification(self, category: str, message: str, exercise: str):
@@ -187,6 +229,18 @@ class OxyZenApp:
         else:
             self.pause_until = None
             self.paused = False
+        
+        # Vérifier si la session est verrouillée
+        if is_session_locked():
+            print("🔒 Session verrouillée, notification ignorée")
+            return
+        
+        # Vérifier le temps d'inactivité
+        idle_time = get_idle_duration()
+        if idle_time >= self.idle_threshold:
+            idle_minutes = int(idle_time / 60)
+            print(f"💤 Utilisateur inactif ({idle_minutes} min), notification ignorée")
+            return
         
         # Sélectionner un exercice
         result = self.selector.select_next_exercise()
