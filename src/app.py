@@ -282,6 +282,9 @@ class OxyZenApp:
             if now.weekday() < 5:  # Lundi à vendredi seulement
                 schedule.run_pending()
             
+            # Actualiser le menu pour que l'info "Prochaine notification" soit à jour
+            self.update_icon_menu()
+            
             time.sleep(60)  # Vérifier toutes les minutes
     
     def pause_for_hour(self):
