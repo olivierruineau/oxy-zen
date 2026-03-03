@@ -140,6 +140,23 @@ class ExerciseSelector:
 
 class OxyZenApp:
     """Application principale Oxy-Zen."""
+
+    def show_notification_config(self):
+        """Affiche la fenêtre de configuration des notifications."""
+        from .ui import show_notification_config_window
+        def on_save(config):
+            self.preferences.update_notification_config(config)
+            print(f"✅ Config notification sauvegardée: {config}")
+            # Reconfigurer le scheduler pour appliquer les nouveaux horaires
+            schedule.clear()
+            self.notification_jobs.clear()
+            self.setup_schedule()
+            self.update_icon_menu()
+            print("✅ Horaires de notification mis à jour")
+        # Lancer dans un thread pour ne pas bloquer l'UI principale
+        import threading
+        thread = threading.Thread(target=lambda: show_notification_config_window(self.preferences.notification_config, on_save), daemon=True)
+        thread.start()
     
     def __init__(self):
         self.preferences = UserPreferences()
@@ -287,21 +304,40 @@ class OxyZenApp:
     
     def setup_schedule(self):
         """Configure les tâches planifiées."""
-        # Notifications toutes les 30 minutes entre 7h30 et 16h, lun-ven
-        # Programmer à des heures fixes au lieu d'un intervalle
+        # Récupérer les paramètres de configuration
+        config = self.preferences.notification_config
+        frequency = config.get("frequency", 30)  # en minutes
+        moment = config.get("moment", 0)  # offset en minutes
+        start_hour = config.get("start_hour", 7)
+        start_minute = config.get("start_minute", 30)
+        end_hour = config.get("end_hour", 16)
+        end_minute = config.get("end_minute", 0)
+        
+        # Si fréquence = 0 (Jamais), ne rien programmer
+        if frequency == 0:
+            print("⚠️ Notifications désactivées")
+            return
+        
+        # Notifications entre les horaires configurés, lun-ven
         notification_times = []
-        hour = 7
-        minute = 30
-        while hour < 16 or (hour == 16 and minute == 0):
+        hour = start_hour
+        minute = start_minute + moment  # Appliquer l'offset
+        if minute >= 60:
+            minute -= 60
+            hour += 1
+        
+        end_total_minutes = end_hour * 60 + end_minute
+        
+        while (hour * 60 + minute) <= end_total_minutes:
             time_str = f"{hour:02d}:{minute:02d}"
             notification_times.append(time_str)
             job = schedule.every().day.at(time_str).do(self.notification_job)
             self.notification_jobs.append(job)
             
-            # Incrémenter de 30 minutes
-            minute += 30
+            # Incrémenter selon la fréquence configurée
+            minute += frequency
             if minute >= 60:
-                minute = 0
+                minute -= 60
                 hour += 1
         
         # Check-in quotidien une fois par jour (heure aléatoire entre 10h et 14h)
@@ -321,10 +357,11 @@ class OxyZenApp:
         if now.weekday() >= 5:  # Weekend
             return False
         
-        # Vérifier l'heure (7h30 - 16h00)
+        # Vérifier l'heure avec les horaires configurés
+        config = self.preferences.notification_config
         current_time = now.time()
-        start_time = dt_time(7, 30)
-        end_time = dt_time(16, 0)
+        start_time = dt_time(config.get("start_hour", 7), config.get("start_minute", 30))
+        end_time = dt_time(config.get("end_hour", 16), config.get("end_minute", 0))
         
         return start_time <= current_time <= end_time
     
@@ -353,9 +390,15 @@ class OxyZenApp:
         """Met en pause jusqu'au lendemain."""
         from datetime import timedelta
         self.paused = True
-        # Pause jusqu'à demain 7h30
+        # Pause jusqu'à demain (heure de début configurée)
+        config = self.preferences.notification_config
         tomorrow = datetime.now() + timedelta(days=1)
-        self.pause_until = tomorrow.replace(hour=7, minute=30, second=0, microsecond=0)
+        self.pause_until = tomorrow.replace(
+            hour=config.get("start_hour", 7), 
+            minute=config.get("start_minute", 30), 
+            second=0, 
+            microsecond=0
+        )
         print("⏸️  Pause jusqu'à demain")
         self.update_icon_menu()
     
@@ -411,9 +454,15 @@ class OxyZenApp:
             
             # Vérifier si on est dans un jour de travail
             if now.weekday() >= 5:  # Weekend
+                config = self.preferences.notification_config
                 days_until_monday = 7 - now.weekday()
                 next_work_day = now + timedelta(days=days_until_monday)
-                next_work_day = next_work_day.replace(hour=7, minute=30, second=0, microsecond=0)
+                next_work_day = next_work_day.replace(
+                    hour=config.get("start_hour", 7), 
+                    minute=config.get("start_minute", 30), 
+                    second=0, 
+                    microsecond=0
+                )
                 return f"Lun {next_work_day.strftime('%H:%M')}"
             
             # Trouver la prochaine notification parmi les jobs sauvegardés
@@ -430,20 +479,11 @@ class OxyZenApp:
                 else:
                     return f"Demain {next_run.strftime('%H:%M')}"
             
-            # Fallback: calculer manuellement la prochaine heure fixe
-            current_time = now.time()
-            # Liste des heures de notification
-            notification_hours = [(7, 30), (8, 0), (8, 30), (9, 0), (9, 30), (10, 0), (10, 30),
-                                   (11, 0), (11, 30), (12, 0), (12, 30), (13, 0), (13, 30),
-                                   (14, 0), (14, 30), (15, 0), (15, 30), (16, 0)]
-            
-            for h, m in notification_hours:
-                notif_time = dt_time(h, m)
-                if current_time < notif_time:
-                    return f"{h:02d}:{m:02d}"
-            
-            # Si après 16h, retourner demain 7h30
-            return "Demain 07:30"
+            # Fallback: retourner heure de début demain
+            config = self.preferences.notification_config
+            start_hour = config.get("start_hour", 7)
+            start_minute = config.get("start_minute", 30)
+            return f"Demain {start_hour:02d}:{start_minute:02d}"
             
         except Exception as e:
             print(f"❌ Erreur calcul prochaine notification: {e}")
@@ -472,6 +512,7 @@ class OxyZenApp:
             MenuItem("Snooze 5 min", lambda: self.snooze_notification(), enabled=self.last_notification is not None),
             MenuItem("Check-in manuel", lambda: self.show_checkin()),
             MenuItem("Voir statistiques", lambda: self.show_stats()),
+            MenuItem("Configurer notifications", lambda: self.show_notification_config()),
             Menu.SEPARATOR,
             MenuItem("Pause 1 heure", lambda: self.pause_for_hour(), enabled=not self.paused),
             MenuItem("Pause jusqu'à demain", lambda: self.pause_until_tomorrow(), enabled=not self.paused),
