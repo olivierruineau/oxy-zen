@@ -31,10 +31,17 @@ class UserPreferences:
             "total_checkins": 0,
             "exercises_done": [],
         }
-        
+        # Ajout config notification (fréquence en minutes, moment en minutes)
+        self.notification_config = {
+            "frequency": 30,  # par défaut toutes les 30 min
+            "moment": 0,      # par défaut à l'heure pile
+            "start_hour": 7,  # heure de début de travail
+            "start_minute": 30,
+            "end_hour": 16,   # heure de fin de travail
+            "end_minute": 0,
+        }
         # Créer le répertoire de config si nécessaire
         self.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
-        
         # Charger la config existante ou créer une nouvelle
         self.load()
     
@@ -48,10 +55,10 @@ class UserPreferences:
                     self.last_checkin = data.get("last_checkin", "")
                     self.weights = data.get("weights", {})
                     self.stats = data.get("stats", self.stats)
+                    self.notification_config = data.get("notification_config", self.notification_config)
             except (json.JSONDecodeError, IOError):
                 # Si erreur de lecture, on garde les valeurs par défaut
                 pass
-        
         # Si pas de poids définis, calculer avec configuration par défaut
         if not self.weights:
             self.calculate_weights()
@@ -63,13 +70,18 @@ class UserPreferences:
             "last_checkin": self.last_checkin,
             "weights": self.weights,
             "stats": self.stats,
+            "notification_config": self.notification_config,
         }
-        
         try:
             with open(self.CONFIG_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
         except IOError as e:
             print(f"Erreur lors de la sauvegarde de la config: {e}")
+    
+    def update_notification_config(self, config: Dict):
+        """Met à jour la configuration des notifications et sauvegarde."""
+        self.notification_config.update(config)
+        self.save()
     
     def update_problem_areas(self, areas: List[str]):
         """Met à jour les zones à problème et recalcule les poids."""

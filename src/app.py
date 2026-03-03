@@ -8,6 +8,8 @@ import random
 import schedule
 import time
 import threading
+import ctypes
+from ctypes import wintypes
 from pathlib import Path
 from datetime import datetime, time as dt_time
 from typing import Dict, List, Optional, Tuple
@@ -18,6 +20,43 @@ from PIL import Image, ImageDraw
 
 from .config import UserPreferences
 from .ui import show_checkin_dialog, show_stats_window
+
+
+def get_idle_duration() -> int:
+    """Retourne le temps d'inactivité en secondes (Windows API)."""
+    try:
+        class LASTINPUTINFO(ctypes.Structure):
+            _fields_ = [
+                ('cbSize', wintypes.UINT),
+                ('dwTime', wintypes.DWORD),
+            ]
+
+        lastInputInfo = LASTINPUTINFO()
+        lastInputInfo.cbSize = ctypes.sizeof(LASTINPUTINFO)
+        
+        if ctypes.windll.user32.GetLastInputInfo(ctypes.byref(lastInputInfo)):
+            millis = ctypes.windll.kernel32.GetTickCount() - lastInputInfo.dwTime
+            return millis / 1000.0  # Convertir en secondes
+        else:
+            return 0
+    except Exception as e:
+        print(f"❌ Erreur détection inactivité: {e}")
+        return 0
+
+
+def is_session_locked() -> bool:
+    """Détecte si la session Windows est verrouillée."""
+    try:
+        # OpenInputDesktop retourne NULL si le desktop est verrouillé
+        hDesktop = ctypes.windll.user32.OpenInputDesktop(0, False, 0)
+        if hDesktop == 0:
+            return True  # Session verrouillée
+        else:
+            ctypes.windll.user32.CloseDesktop(hDesktop)
+            return False  # Session active
+    except Exception as e:
+        print(f"❌ Erreur détection verrouillage: {e}")
+        return False
 
 
 class ExerciseSelector:
@@ -101,6 +140,23 @@ class ExerciseSelector:
 
 class OxyZenApp:
     """Application principale Oxy-Zen."""
+
+    def show_notification_config(self):
+        """Affiche la fenêtre de configuration des notifications."""
+        from .ui import show_notification_config_window
+        def on_save(config):
+            self.preferences.update_notification_config(config)
+            print(f"✅ Config notification sauvegardée: {config}")
+            # Reconfigurer le scheduler pour appliquer les nouveaux horaires
+            schedule.clear()
+            self.notification_jobs.clear()
+            self.setup_schedule()
+            self.update_icon_menu()
+            print("✅ Horaires de notification mis à jour")
+        # Lancer dans un thread pour ne pas bloquer l'UI principale
+        import threading
+        thread = threading.Thread(target=lambda: show_notification_config_window(self.preferences.notification_config, on_save), daemon=True)
+        thread.start()
     
     def __init__(self):
         self.preferences = UserPreferences()
@@ -119,33 +175,63 @@ class OxyZenApp:
         # Icône système
         self.icon = None
         
+        # Dernière notification pour snooze
+        self.last_notification = None
+        
+        # Liste des jobs de notification pour tracking
+        self.notification_jobs = []
+        
+        # Seuil d'inactivité (en secondes) avant de considérer l'utilisateur absent
+        self.idle_threshold = 300  # 5 minutes par défaut
+        
         print("🧘 Oxy-Zen démarré!")
     
     def send_notification(self, category: str, message: str, exercise: str):
         """Envoie une notification Windows."""
         try:
+            # Sauvegarder pour le snooze
+            self.last_notification = (category, message, exercise)
+            
             notif = Notification(
                 app_id="Oxy-Zen",
                 title=message,
                 msg=exercise,
-                duration="short",
+                duration="long",  # "long" au lieu de "short" pour plus de visibilité
                 icon=str(Path(__file__).parent / "icon.png") if (Path(__file__).parent / "icon.png").exists() else ""
             )
             
-            # Son discret
-            notif.set_audio(audio.Default, loop=False)
+            # Son plus audible pour attirer l'attention
+            notif.set_audio(audio.Reminder, loop=False)
             
-            # Afficher
+            # Afficher (sans boutons d'action pour éviter les erreurs de protocole Windows)
+            # Utiliser le menu système pour Snooze au lieu des actions de notification
             notif.show()
             
             # Statistiques
             self.preferences.increment_notification_count()
             self.preferences.add_exercise_to_history(category, message)
             
+            # Mettre à jour le menu pour activer le bouton snooze
+            self.update_icon_menu()
+            
             print(f"📬 Notification envoyée: {message}")
             
         except Exception as e:
             print(f"❌ Erreur notification: {e}")
+    
+    def snooze_notification(self):
+        """Rappelle la dernière notification après 5 minutes."""
+        if self.last_notification:
+            category, message, exercise = self.last_notification
+            print("⏰ Snooze - notification dans 5 minutes")
+            
+            def send_snooze():
+                time.sleep(300)  # 5 minutes
+                if not self.paused:
+                    self.send_notification(category, message, exercise)
+            
+            snooze_thread = threading.Thread(target=send_snooze, daemon=True)
+            snooze_thread.start()
     
     def notification_job(self):
         """Job de notification (appelé par le scheduler)."""
@@ -160,6 +246,18 @@ class OxyZenApp:
         else:
             self.pause_until = None
             self.paused = False
+        
+        # Vérifier si la session est verrouillée
+        if is_session_locked():
+            print("🔒 Session verrouillée, notification ignorée")
+            return
+        
+        # Vérifier le temps d'inactivité
+        idle_time = get_idle_duration()
+        if idle_time >= self.idle_threshold:
+            idle_minutes = int(idle_time / 60)
+            print(f"💤 Utilisateur inactif ({idle_minutes} min), notification ignorée")
+            return
         
         # Sélectionner un exercice
         result = self.selector.select_next_exercise()
@@ -206,8 +304,41 @@ class OxyZenApp:
     
     def setup_schedule(self):
         """Configure les tâches planifiées."""
-        # Notifications toutes les 30 minutes entre 7h30 et 16h, lun-ven
-        schedule.every(30).minutes.do(self.notification_job)
+        # Récupérer les paramètres de configuration
+        config = self.preferences.notification_config
+        frequency = config.get("frequency", 30)  # en minutes
+        moment = config.get("moment", 0)  # offset en minutes
+        start_hour = config.get("start_hour", 7)
+        start_minute = config.get("start_minute", 30)
+        end_hour = config.get("end_hour", 16)
+        end_minute = config.get("end_minute", 0)
+        
+        # Si fréquence = 0 (Jamais), ne rien programmer
+        if frequency == 0:
+            print("⚠️ Notifications désactivées")
+            return
+        
+        # Notifications entre les horaires configurés, lun-ven
+        notification_times = []
+        hour = start_hour
+        minute = start_minute + moment  # Appliquer l'offset
+        if minute >= 60:
+            minute -= 60
+            hour += 1
+        
+        end_total_minutes = end_hour * 60 + end_minute
+        
+        while (hour * 60 + minute) <= end_total_minutes:
+            time_str = f"{hour:02d}:{minute:02d}"
+            notification_times.append(time_str)
+            job = schedule.every().day.at(time_str).do(self.notification_job)
+            self.notification_jobs.append(job)
+            
+            # Incrémenter selon la fréquence configurée
+            minute += frequency
+            if minute >= 60:
+                minute -= 60
+                hour += 1
         
         # Check-in quotidien une fois par jour (heure aléatoire entre 10h et 14h)
         checkin_hour = random.randint(10, 13)
@@ -215,7 +346,7 @@ class OxyZenApp:
         checkin_time = f"{checkin_hour:02d}:{checkin_minute:02d}"
         schedule.every().day.at(checkin_time).do(self.checkin_job)
         
-        print(f"📅 Notifications: toutes les 30 min (7h30-16h, lun-ven)")
+        print(f"📅 Notifications programmées: {', '.join(notification_times)}")
         print(f"📅 Check-in quotidien: {checkin_time}")
     
     def should_run_now(self) -> bool:
@@ -226,19 +357,24 @@ class OxyZenApp:
         if now.weekday() >= 5:  # Weekend
             return False
         
-        # Vérifier l'heure (7h30 - 16h00)
+        # Vérifier l'heure avec les horaires configurés
+        config = self.preferences.notification_config
         current_time = now.time()
-        start_time = dt_time(7, 30)
-        end_time = dt_time(16, 0)
+        start_time = dt_time(config.get("start_hour", 7), config.get("start_minute", 30))
+        end_time = dt_time(config.get("end_hour", 16), config.get("end_minute", 0))
         
         return start_time <= current_time <= end_time
     
     def schedule_loop(self):
         """Boucle principale du scheduler."""
         while self.running:
-            # Ne vérifier les jobs que pendant les heures de travail
-            if self.should_run_now():
+            # Ne vérifier les jobs que les jours de semaine
+            now = datetime.now()
+            if now.weekday() < 5:  # Lundi à vendredi seulement
                 schedule.run_pending()
+            
+            # Actualiser le menu pour que l'info "Prochaine notification" soit à jour
+            self.update_icon_menu()
             
             time.sleep(60)  # Vérifier toutes les minutes
     
@@ -254,9 +390,15 @@ class OxyZenApp:
         """Met en pause jusqu'au lendemain."""
         from datetime import timedelta
         self.paused = True
-        # Pause jusqu'à demain 7h30
+        # Pause jusqu'à demain (heure de début configurée)
+        config = self.preferences.notification_config
         tomorrow = datetime.now() + timedelta(days=1)
-        self.pause_until = tomorrow.replace(hour=7, minute=30, second=0, microsecond=0)
+        self.pause_until = tomorrow.replace(
+            hour=config.get("start_hour", 7), 
+            minute=config.get("start_minute", 30), 
+            second=0, 
+            microsecond=0
+        )
         print("⏸️  Pause jusqu'à demain")
         self.update_icon_menu()
     
@@ -266,6 +408,16 @@ class OxyZenApp:
         self.pause_until = None
         print("▶️  Reprise")
         self.update_icon_menu()
+    
+    def trigger_notification_now(self):
+        """Déclenche une notification immédiatement sur demande."""
+        result = self.selector.select_next_exercise()
+        if result:
+            category, message, exercise = result
+            self.send_notification(category, message, exercise)
+            print("🔔 Notification déclenchée manuellement")
+        else:
+            print("❌ Impossible de sélectionner un exercice")
     
     def quit_app(self, icon=None, item=None):
         """Quitte l'application."""
@@ -288,6 +440,57 @@ class OxyZenApp:
         
         return img
     
+    def get_next_notification_time(self) -> Optional[str]:
+        """Retourne l'heure de la prochaine notification formatée."""
+        try:
+            from datetime import timedelta
+            now = datetime.now()
+            
+            # Si en pause, afficher jusqu'à quand
+            if self.paused or (self.pause_until and now < self.pause_until):
+                if self.pause_until:
+                    return f"En pause jusqu'à {self.pause_until.strftime('%H:%M')}"
+                return "En pause"
+            
+            # Vérifier si on est dans un jour de travail
+            if now.weekday() >= 5:  # Weekend
+                config = self.preferences.notification_config
+                days_until_monday = 7 - now.weekday()
+                next_work_day = now + timedelta(days=days_until_monday)
+                next_work_day = next_work_day.replace(
+                    hour=config.get("start_hour", 7), 
+                    minute=config.get("start_minute", 30), 
+                    second=0, 
+                    microsecond=0
+                )
+                return f"Lun {next_work_day.strftime('%H:%M')}"
+            
+            # Trouver la prochaine notification parmi les jobs sauvegardés
+            next_times = []
+            for job in self.notification_jobs:
+                if job.next_run:
+                    next_times.append(job.next_run)
+            
+            if next_times:
+                next_run = min(next_times)
+                # Si c'est aujourd'hui, afficher juste l'heure
+                if next_run.date() == now.date():
+                    return next_run.strftime('%H:%M')
+                else:
+                    return f"Demain {next_run.strftime('%H:%M')}"
+            
+            # Fallback: retourner heure de début demain
+            config = self.preferences.notification_config
+            start_hour = config.get("start_hour", 7)
+            start_minute = config.get("start_minute", 30)
+            return f"Demain {start_hour:02d}:{start_minute:02d}"
+            
+        except Exception as e:
+            print(f"❌ Erreur calcul prochaine notification: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
     def update_icon_menu(self):
         """Met à jour le menu de l'icône."""
         if self.icon:
@@ -297,13 +500,19 @@ class OxyZenApp:
         """Crée le menu de l'icône système."""
         status = "⏸️ EN PAUSE" if self.paused else "✅ Actif"
         areas = ", ".join(self.preferences.problem_areas) if self.preferences.problem_areas else "Aucune"
+        next_notif = self.get_next_notification_time()
+        next_notif_text = f"Prochaine: {next_notif}" if next_notif else "Prochaine: --"
         
         return Menu(
             MenuItem(f"Status: {status}", None, enabled=False),
             MenuItem(f"Zones: {areas}", None, enabled=False),
+            MenuItem(next_notif_text, None, enabled=False),
             Menu.SEPARATOR,
+            MenuItem("Déclencher notification", lambda: self.trigger_notification_now()),
+            MenuItem("Snooze 5 min", lambda: self.snooze_notification(), enabled=self.last_notification is not None),
             MenuItem("Check-in manuel", lambda: self.show_checkin()),
             MenuItem("Voir statistiques", lambda: self.show_stats()),
+            MenuItem("Configurer notifications", lambda: self.show_notification_config()),
             Menu.SEPARATOR,
             MenuItem("Pause 1 heure", lambda: self.pause_for_hour(), enabled=not self.paused),
             MenuItem("Pause jusqu'à demain", lambda: self.pause_until_tomorrow(), enabled=not self.paused),
