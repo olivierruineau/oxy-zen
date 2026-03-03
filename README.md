@@ -4,7 +4,8 @@ Application de rappels d'exercices adaptatifs pour ta journée de travail. Parce
 
 ## 🎯 Fonctionnalités
 
-- 🔔 **Notifications récurrentes** : Tous les 30 minutes pendant tes heures de travail (7h30-16h, lun-ven)
+- 🔔 **Notifications récurrentes** : Configurables (30 min, 1h, 2h) pendant tes heures de travail
+- ⚙️ **Configuration personnalisable** : Fréquence, horaires de travail, moment d'envoi
 - 🎭 **Messages sarcastiques** : Des rappels avec humour pour te motiver à bouger
 - 🎯 **Adaptation intelligente** : Check-in quotidien pour identifier tes zones à problème
 - 📊 **Pondération 70/30** : 70% d'exercices ciblés sur tes problèmes, 30% de prévention globale
@@ -52,8 +53,11 @@ L'application ajustera automatiquement les exercices proposés selon tes besoins
 
 Une fois lancée, l'application apparaît dans la barre système (près de l'horloge). Clique droit sur l'icône pour :
 
+- � **Déclencher notification** : Test immédiat d'une notification
+- ⏰ **Snooze 5 min** : Rappel de la dernière notification dans 5 minutes
 - 📝 **Check-in manuel** : Refaire le questionnaire
 - 📊 **Voir statistiques** : Consulter tes stats d'utilisation
+- ⚙️ **Configurer notifications** : Personnaliser fréquence et horaires
 - ⏸️ **Pause 1 heure** : Suspendre temporairement
 - 🌙 **Pause jusqu'à demain** : Désactiver pour aujourd'hui
 - ▶️ **Reprendre** : Réactiver après une pause
@@ -61,7 +65,7 @@ Une fois lancée, l'application apparaît dans la barre système (près de l'hor
 
 ### Notifications
 
-Toutes les 30 minutes (entre 7h30 et 16h, uniquement en semaine), tu recevras une notification avec :
+Selon la fréquence configurée (par défaut toutes les 30 minutes, entre 7h30 et 16h, uniquement en semaine), tu recevras une notification avec :
 - Un message sarcastique motivant
 - Une instruction d'exercice précise
 
@@ -71,11 +75,29 @@ Exemple :
 Étire-toi en arrière pendant 30 secondes, mains sur les hanches
 ```
 
+### Configuration des notifications
+
+Depuis le menu système, clique sur **"Configurer notifications"** pour personnaliser :
+
+- **Fréquence** : Toutes les 30 min, 1h, 2h, ou jamais
+- **Moment d'envoi** : À l'heure pile (10:00), +7 min (10:07), +15 min (10:15), ou +23 min (10:23)
+- **Horaires de travail** : Heure de début et de fin (par défaut 7h30 - 16h00)
+
+Les changements sont sauvegardés automatiquement et appliqués immédiatement.
+
 ### Check-in quotidien
 
 Une fois par jour (heure aléatoire entre 10h et 14h), une fenêtre de check-in rapide apparaît pour mettre à jour tes besoins. Tu peux aussi le déclencher manuellement depuis le menu.
 
 ## ⚙️ Personnalisation
+
+### Configuration via l'interface
+
+Utilise le menu **"Configurer notifications"** (clic droit sur l'icône système) pour personnaliser :
+
+- **Fréquence des notifications** : 30 min, 1h, 2h, ou désactiver
+- **Moment d'envoi** : Décalage de 0, 7, 15, ou 23 minutes par rapport à l'heure de base
+- **Horaires de travail** : Personnalise ton heure de début et de fin de journée
 
 ### Modifier les messages
 
@@ -95,21 +117,6 @@ Catégories disponibles :
 - `respiration` : Exercices de respiration
 - `fatigue_generale` : Exercices énergisants
 - `prevention_globale` : Exercices de prévention générale
-
-### Modifier les horaires
-
-Dans `src/app.py`, ligne ~215, modifie :
-```python
-start_time = dt_time(7, 30)  # Heure de début
-end_time = dt_time(16, 0)    # Heure de fin
-```
-
-### Modifier la fréquence
-
-Dans `src/app.py`, ligne ~202, modifie :
-```python
-schedule.every(30).minutes.do(self.notification_job)  # Change 30 par la valeur désirée
-```
 
 ## 🔧 Lancement automatique au démarrage
 
@@ -139,8 +146,9 @@ oxy-zen/
 │   ├── app.py           # Application principale
 │   ├── config.py        # Gestion des préférences utilisateur
 │   └── ui/              # Interfaces graphiques
-│       ├── checkin_window.py   # Fenêtre de check-in
-│       └── stats_window.py     # Fenêtre de statistiques
+│       ├── checkin_window.py          # Fenêtre de check-in
+│       ├── stats_window.py            # Fenêtre de statistiques
+│       └── notification_config_window.py  # Fenêtre de configuration
 ├── data/                # Données de l'application
 │   └── exercises.yaml   # Messages et exercices
 ├── scripts/             # Scripts utilitaires
@@ -157,10 +165,15 @@ L'application crée automatiquement un dossier de configuration :
 - **Windows** : `C:\Users\TON_USER\.oxy-zen\config.json`
 
 Ce fichier contient :
-- Tes zones à problème actuelles
-- La date du dernier check-in
-- Les pondérations calculées
-- Tes statistiques d'utilisation
+- **Zones à problème** : Tes zones identifiées lors du check-in
+- **Date du dernier check-in** : Timestamp de ta dernière mise à jour
+- **Pondérations calculées** : Poids de chaque catégorie d'exercices
+- **Statistiques d'utilisation** : Nombre de notifications, historique des exercices
+- **Configuration des notifications** :
+  - `frequency` : Fréquence en minutes (30, 60, 120, ou 0 pour désactiver)
+  - `moment` : Décalage en minutes (0, 7, 15, ou 23)
+  - `start_hour` et `start_minute` : Heure de début de travail
+  - `end_hour` et `end_minute` : Heure de fin de travail
 
 Tu peux le supprimer pour réinitialiser l'application.
 
