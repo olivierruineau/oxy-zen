@@ -3,6 +3,7 @@ Oxy-Zen - Application de rappels d'exercices adaptatifs
 Envoie des notifications récurrentes pour encourager les pauses santé pendant la journée de travail.
 """
 
+import sys
 import yaml
 import random
 import schedule
@@ -20,6 +21,19 @@ from PIL import Image, ImageDraw
 
 from .config import UserPreferences
 from .ui import show_checkin_dialog, show_stats_window
+
+
+def get_base_path() -> Path:
+    """
+    Retourne le chemin de base de l'application.
+    Gère à la fois le mode développement et l'exécutable PyInstaller.
+    """
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # Mode PyInstaller : sys._MEIPASS est le dossier temporaire d'extraction
+        return Path(sys._MEIPASS)
+    else:
+        # Mode développement : utilise le chemin du fichier
+        return Path(__file__).parent.parent
 
 
 def get_idle_duration() -> int:
@@ -161,7 +175,7 @@ class OxyZenApp:
     def __init__(self):
         self.preferences = UserPreferences()
         self.selector = ExerciseSelector(
-            Path(__file__).parent.parent / "data" / "exercises.yaml",
+            get_base_path() / "data" / "exercises.yaml",
             self.preferences
         )
         

@@ -13,7 +13,33 @@ Application de rappels d'exercices adaptatifs pour ta journée de travail. Parce
 - ⏸️ **Contrôle facile** : Pause/reprise depuis l'icône système
 - 📈 **Statistiques** : Suivi de tes notifications et exercices
 
-## 📥 Installation
+## 📥 Installation (Utilisateur final)
+
+### Installation rapide - Exécutable Windows
+
+**Prérequis** : Windows 10/11 uniquement
+
+**Pas besoin d'installer Python !** 🎉
+
+1. **Télécharge l'exécutable**
+   - Télécharge `OxyZen.exe` depuis la dernière release
+   - Ou demande à un développeur de le générer (voir section développeur ci-dessous)
+
+2. **Lance l'application**
+   - Double-clique sur `OxyZen.exe`
+   - Une fenêtre de check-in apparaîtra pour configurer tes besoins
+   - L'icône apparaîtra dans la barre système (près de l'horloge)
+
+3. **[Optionnel] Configure le démarrage automatique**
+   - Appuie sur `Win + R`, tape `shell:startup` et appuie sur Entrée
+   - Copie `OxyZen.exe` dans ce dossier (ou crée un raccourci)
+   - L'application démarrera automatiquement à chaque connexion Windows
+
+**C'est tout !** L'application ne nécessite aucune installation supplémentaire. 🚀
+
+---
+
+## 📥 Installation (Développeur)
 
 ### Prérequis
 - Python 3.12 ou supérieur
@@ -138,7 +164,57 @@ Catégories disponibles :
 6. Arguments : `run python main.py`
 7. Dossier de démarrage : `C:\Users\TON_USER\Code\oxy-zen`
 
-## 📁 Structure du projet
+## � Générer l'exécutable (Développeur)
+
+### Build de l'exécutable Windows
+
+Pour créer un fichier `OxyZen.exe` autonome distributable :
+
+```powershell
+# Depuis la racine du projet
+.\scripts\build.bat
+```
+
+Le script va :
+1. Installer PyInstaller et les dépendances de développement via `uv`
+2. Utiliser PyInstaller avec la configuration `build.spec`
+3. Générer `dist\OxyZen.exe` (~15-25 MB)
+
+**Fichiers générés** :
+- `dist\OxyZen.exe` : Exécutable final à distribuer
+- `build\` : Fichiers temporaires de build (peut être supprimé)
+
+**Test de l'exécutable** :
+```powershell
+cd dist
+.\OxyZen.exe
+```
+
+**⚠️ Important** : Teste l'exe sur une machine **sans Python installé** pour valider le packaging.
+
+### Configuration PyInstaller
+
+Le fichier `build.spec` configure le packaging :
+- **Mode onefile** : Un seul fichier .exe (portable)
+- **Mode windowed** : Pas de console visible
+- **Données intégrées** : `data/exercises.yaml` embarqué dans l'exe
+- **Imports cachés** : Modules non détectés automatiquement (`pystray`, `PIL._tkinter_finder`)
+- **Compression UPX** : Réduction de la taille de l'exe
+
+### Build manuel (avancé)
+
+```powershell
+# Installer PyInstaller
+uv sync --group dev
+
+# Lancer le build avec PyInstaller
+uv run pyinstaller build.spec --clean
+
+# Options supplémentaires
+uv run pyinstaller build.spec --clean --log-level DEBUG  # Verbose
+```
+
+## �📁 Structure du projet
 
 ```
 oxy-zen/
@@ -152,9 +228,14 @@ oxy-zen/
 ├── data/                # Données de l'application
 │   └── exercises.yaml   # Messages et exercices
 ├── scripts/             # Scripts utilitaires
-│   ├── start.bat       # Lancement rapide
+│   ├── start.bat       # Lancement rapide (dev)
+│   ├── build.bat       # Génération de l'exécutable
 │   └── kill.bat        # Arrêt forcé
+├── dist/                # Exécutable généré (après build)
+│   └── OxyZen.exe      # Distributable final
+├── build/               # Fichiers temporaires PyInstaller (après build)
 ├── main.py             # Point d'entrée
+├── build.spec          # Configuration PyInstaller
 ├── pyproject.toml      # Configuration du projet
 └── README.md           # Ce fichier
 ```
