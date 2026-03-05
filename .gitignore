@@ -13,7 +13,11 @@ wheels/
 *.manifest
 *.spec.bak
 
+# Tests et couverture
+.pytest_cache/
+htmlcov/
+coverage.xml
+.coverage
+
 # Oxy-Zen specific
 icon.png
-test_*.py
-
