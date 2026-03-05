@@ -22,6 +22,51 @@ dos:
   
   - message: "Quasimodo appelé, il veut récupérer sa posture"
     exercise: "Ouvre ta poitrine : mains derrière la tête, pousse les coudes en arrière"
+  
+  - message: "Ton dos a plus de nœuds qu'une corde de scout"
+    exercise: "Assis, entoure tes genoux avec tes bras et arrondis ton dos, 40s"
+  
+  - message: "Ta colonne vertébrale négocie avec la gravité"
+    exercise: "Debout, bras croisés, tourne le buste de gauche à droite, 15x"
+  
+  - message: "C'est pas un dos, c'est un sac à dos trop chargé"
+    exercise: "Allongé au sol, genoux pliés, bascule le bassin 12x"
+  
+  - message: "Ton rachis a envoyé une demande d'asile"
+    exercise: "Étirement du cobra : allongé ventre, soulève le buste, 30s x 2"
+  
+  - message: "T'as le dos aussi flexible qu'une barre de fer"
+    exercise: "Sur une chaise, penche-toi en avant entre tes genoux, 45s"
+  
+  - message: "Tes trapèzes sont en mode bunker antiatomique"
+    exercise: "Hausse et relâche les épaules brusquement, 15x"
+  
+  - message: "Ta colonne fait des nœuds dignes d'un marin"
+    exercise: "Torsion allongée : dos au sol, un genou croise le corps, 40s x 2"
+  
+  - message: "Ton dos a déclaré la guerre à ton fauteuil"
+    exercise: "Étirement latéral : bras au-dessus de la tête, penche à gauche puis droite, 25s"
+  
+  - message: "Tes lombaires ont créé un syndicat"
+    exercise: "Position de l'enfant : à genoux, assis sur les talons, bras devant, 1 min"
+  
+  - message: "C'est pas une posture, c'est une sculpture moderne ratée"
+    exercise: "Debout, mains dans le dos entrelacées, soulève les bras, 30s"
+  
+  - message: "Ton dos ressemble à la courbe du Bitcoin"
+    exercise: "Étirement du psoas : fente, genou arrière au sol, pousse les hanches, 35s x 2"
+  
+  - message: "Ta colonne vertébrale a besoin d'un reset complet"
+    exercise: "Suspendu ou accroché à quelque chose, laisse pendre ton dos, 20s"
+  
+  - message: "Même un spaghetti cuit est plus tonique"
+    exercise: "Superman : allongé ventre, lève bras et jambes, 8x de 5s"
+  
+  - message: "Tes dorsaux ont pris leur retraite anticipée"
+    exercise: "Rameur imaginaire : assis, tire les coudes en arrière, 20x"
+  
+  - message: "T'as le dos d'une virgule géante"
+    exercise: "Arc et relaxation : alternes dos rond intense et dos droit, 10x"
 
 yeux:
   - message: "Tes yeux méritent mieux que cet écran 👀"
@@ -44,6 +89,48 @@ yeux:
   
   - message: "Ton ophtalmo pleure en pensant à toi"
     exercise: "Focus proche/loin : alterne entre ton doigt à 20cm et un objet lointain"
+  
+  - message: "Tes globes oculaires sont en grève"
+    exercise: "Dessine des 8 couchés avec tes yeux, 10x lentement"
+  
+  - message: "T'as les yeux plus rouges qu'un panneau STOP"
+    exercise: "Ferme fort les yeux 5s puis ouvre grand, répète 8x"
+  
+  - message: "Tes yeux ont oublié qu'il existe d'autres distances"
+    exercise: "Regarde quelque chose à 1m, 3m, 6m puis l'horizon, 3 cycles"
+  
+  - message: "C'est pas du regard, c'est un laser de la mort"
+    exercise: "Regarde en diagonales : haut-gauche, bas-droite, etc., 6x"
+  
+  - message: "Tes yeux implorent la miséricorde"
+    exercise: "Fais des rotations oculaires complètes, 5x sens horaire, 5x anti-horaire"
+  
+  - message: "T'as le regard d'un zombie sous-payé"
+    exercise: "Cligne rapidement 15x puis normalement 5x, répète 3 fois"
+  
+  - message: "Tes yeux ont plus de fatigue accumulée que ton CPU"
+    exercise: "Masse doucement l'os autour de l'œil avec les index, 30s"
+  
+  - message: "T'as fixé l'écran tellement longtemps que t'as fusionné avec"
+    exercise: "Regarde quelque chose sans écran pendant 2 minutes complètes"
+  
+  - message: "Tes paupières pèsent 10 tonnes chacune"
+    exercise: "Baisse les yeux vers le sol pendant 20s, repose-les"
+  
+  - message: "Même un hibou cligne plus que toi"
+    exercise: "Place tes mains près des yeux et fais varier la lumière, 40s"
+  
+  - message: "Tes yeux ont besoin d'un SPA, genre maintenant"
+    exercise: "Compresse chaude : mains chaudes sur les yeux fermés, respire, 1 min"
+  
+  - message: "T'as la convergence oculaire d'un caméléon défoncé"
+    exercise: "Fixe ton pouce et rapproche-le jusqu'au nez lentement, 8x"
+  
+  - message: "Blue light called, elle veut récupérer ta rétine"
+    exercise: "Regarde quelque chose en lumière naturelle, pas d'écran, 90s"
+  
+  - message: "Tes yeux ont le focus d'un appareil photo cassé"
+    exercise: "Alterne focus rapide entre 2 objets à distances différentes, 15x"
 
 jambes:
   - message: "Tes jambes ont oublié qu'elles servent à marcher 🦵"
@@ -66,6 +153,57 @@ jambes:
   
   - message: "Tes jambes vivent leur pire cauchemar existentiel"
     exercise: "Fentes alternées : 8 répétitions (ou 4 si t'es vraiment mort)"
+  
+  - message: "Tes quadriceps sont en mode hibernation"
+    exercise: "Assis, tends une jambe et contracte le muscle, 10s x 5 chaque"
+  
+  - message: "T'as les jambes d'un flamant rose sous sédatif"
+    exercise: "Équilibre sur une jambe 30s, change, répète 3x"
+  
+  - message: "Tes cuisses cherchent encore leur motivation"
+    exercise: "Squats muraux : dos contre le mur, descends en chaise, 20s x 3"
+  
+  - message: "Tes genoux ont déposé une plainte collective"
+    exercise: "Flexion-extension des genoux debout, 15x lentement"
+  
+  - message: "Ta circulation est plus lente que Windows Update"
+    exercise: "Secoue une jambe puis l'autre vigoureusement, 20s chaque"
+  
+  - message: "Tes pieds ont oublié qu'ils ont des orteils"
+    exercise: "Assis, écarte et recroqueville tes orteils, 15x"
+  
+  - message: "T'as les jambes aussi lourdes qu'un camion de déménagement"
+    exercise: "Allongé, jambes au mur pendant 2 minutes (drainage)"
+  
+  - message: "Tes ischio-jambiers sont plus tendus qu'un câble électrique"
+    exercise: "Debout, pose un pied sur chaise, penche-toi vers l'avant, 35s x 2"
+  
+  - message: "Tes mollets sont en mode statue de sel"
+    exercise: "Étirement mollet contre le mur, une jambe tendue derrière, 40s x 2"
+  
+  - message: "Ta mobilité de hanche est une blague cosmique"
+    exercise: "Cercles avec un genou levé, 10x chaque sens, chaque jambe"
+  
+  - message: "Tes adducteurs ont démissionné sans préavis"
+    exercise: "Assis, plantes des pieds ensemble, pousse genoux vers le sol, 45s"
+  
+  - message: "T'as les jambes d'un piquet de clôture rouillé"
+    exercise: "Fente latérale : glisse sur le côté, alterne, 8x chaque"
+  
+  - message: "Tes pieds sont plus endormis que toi en réunion"
+    exercise: "Masse tes pieds avec tes mains ou roule une balle dessous, 1 min"
+  
+  - message: "Tes tibias ont oublié leur fonction première"
+    exercise: "Marche sur les talons puis sur la pointe, alterne, 30s"
+  
+  - message: "T'as les hanches plus bloquées qu'un coffre-fort"
+    exercise: "Debout, cercles de bassin amples, 10x chaque direction"
+  
+  - message: "Tes fessiers sont en mode veille prolongée"
+    exercise: "Contractions fessiers : serre fort 5s, relâche, 15x"
+  
+  - message: "Tes jambes ont plus besoin d'aide que ton code avec des bugs"
+    exercise: "Balancements de jambe avant-arrière, 10x chaque jambe"
 
 posture:
   - message: "Ta posture ferait pleurer un prof de yoga 🧘"
@@ -85,6 +223,54 @@ posture:
   
   - message: "T'as la posture d'un shrimp qui aurait abandonné"
     exercise: "Contre le mur : talons, fesses, épaules et tête collés, 1 minute"
+  
+  - message: "Ton corps a oublié ce que 'droit' veut dire"
+    exercise: "Imagine un fil qui tire le sommet de ta tête vers le ciel, tiens 45s"
+  
+  - message: "T'es plus penché qu'une tour de Pise défoncée"
+    exercise: "Assis, place un coussin dans ton dos, ajuste ta position, respire"
+  
+  - message: "Tes épaules sont montées jusqu'aux oreilles"
+    exercise: "Descends consciemment les épaules, maintiens, 8 respirations"
+  
+  - message: "Ta tête est plus en avant que tes projets de vie"
+    exercise: "Rentres le menton comme un double menton volontaire, 30s x 3"
+  
+  - message: "T'as l'alignement d'une Tour Eiffel à Tchernobyl"
+    exercise: "Debout, vérifie : oreilles-épaules-hanches-chevilles alignées, ajuste"
+  
+  - message: "Ton cou fait un angle que la géométrie réprouve"
+    exercise: "Rotations lentes de la tête dans les deux sens, 6x chaque"
+  
+  - message: "T'es voûté comme un parchemin ancien"
+    exercise: "Ouvre les bras en croix, pousse la poitrine en avant, 40s"
+  
+  - message: "Ton corps ressemble à un 'S' géant déprimé"
+    exercise: "Auto-correction : redresse chaque partie de bas en haut, maintiens"
+  
+  - message: "Tes vertèbres cervicales ont déménagé sans te prévenir"
+    exercise: "Tourne la tête gauche-droite lentement, 10x chaque côté"
+  
+  - message: "T'as la posture d'un origami raté"
+    exercise: "Assis, place tes mains dans le creux des reins, cambre légèrement"
+  
+  - message: "Ton ergonomie est une insulte à l'évolution humaine"
+    exercise: "Vérifie la hauteur de ton écran et ajuste-le niveau des yeux"
+  
+  - message: "T'as les épaules aussi symétriques qu'un Picasso"
+    exercise: "Lève une épaule puis l'autre alternativement, 12x"
+  
+  - message: "Ta posture fait fuir les kinés à 10 km"
+    exercise: "Planche contre le mur : appuis avant-bras, corps droit, 20s"
+  
+  - message: "T'es affaissé comme un soufflé au fromage raté"
+    exercise: "Inspire en grandissant, expire en maintenant la hauteur, 8x"
+  
+  - message: "Ton sternum s'enfonce comme le Titanic"
+    exercise: "Ouvre la cage thoracique : mains croisées, pousse devant puis au-dessus"
+  
+  - message: "T'as le port de tête d'une autruche perdue"
+    exercise: "Menton parallèle au sol, glisse la tête en arrière, 10x"
 
 respiration:
   - message: "Tu respires ou tu survives? 😮‍💨"
@@ -104,6 +290,51 @@ respiration:
   
   - message: "Ta respiration est plus courte qu'un sprint de 100m"
     exercise: "Respiration complète : inspire par le ventre puis la poitrine, 8x"
+  
+  - message: "Tes poumons fonctionnent à 30% de leur capacité"
+    exercise: "Inspire par le nez 5s, retiens 5s, expire par la bouche 7s, x5"
+  
+  - message: "T'as l'amplitude respiratoire d'un poisson rouge"
+    exercise: "Respiration en 3 temps : inspire bas-moyen-haut, expire, 6x"
+  
+  - message: "Ton oxygène cérébral demande des renforts"
+    exercise: "Respiration énergisante : expire fort par la bouche 20x rapide"
+  
+  - message: "Ta cage thoracique est plus fermée qu'un coffre de banque"
+    exercise: "Inspire bras sur les côtés, expire bras croisés devant, 8x"
+  
+  - message: "T'as oublié que respirer c'est gratuit et illimité"
+    exercise: "Cohérence cardiaque : 5s inspire, 5s expire, 5 minutes (ou 2 min)"
+  
+  - message: "Tes poumons appellent au secours en sourdine"
+    exercise: "Respiration costale : mains sur les côtes, inspire pour les écarter, 6x"
+  
+  - message: "Tu breathes moins qu'un robot aspirateur"
+    exercise: "Soupir profond : inspire à fond, relâche tout en soufflant 'Ahhhh', x4"
+  
+  - message: "Ton CO2 célèbre une fête dans ton sang"
+    exercise: "Respiration purifiante : inspire nez, expire bouche en vidant tout, x8"
+  
+  - message: "T'as la respiration d'un asthmatique en fin de marathon"
+    exercise: "Expire à fond d'abord, puis inspire naturellement, répète 6x"
+  
+  - message: "Tes échanges gazeux sont en grève"
+    exercise: "Respiration apaisante : inspire 4, retiens 7, expire 8, x4 minimum"
+  
+  - message: "Ta ventilation est plus mauvaise que celle de ton bureau"
+    exercise: "Respire dans ton dos : imagine l'air gonflant ton dos, 8 respirations"
+  
+  - message: "T'as le souffle d'un ballon dégonflé"
+    exercise: "Respiration dynamique : inspire vite par le nez, expire lent par la bouche, x10"
+  
+  - message: "Ton système nerveux réclame de l'oxygène premium"
+    exercise: "Respiration 6-3-6-3 : inspire 6, retiens 3, expire 6, retiens 3, x5"
+  
+  - message: "Tu utilises 20% de ta capacité pulmonaire, bravo champion"
+    exercise: "Expire à fond en rentrant le ventre, puis inspire amplement, x7"
+  
+  - message: "Tes alvéoles pulmonaires ont pris un congé sabbatique"
+    exercise: "Respiration fragmentée : inspire en 3 sniffs, expire en 3 souffles, x6"
 
 fatigue_generale:
   - message: "T'as l'énergie d'un escargot sous antidépresseurs 🐌"
@@ -123,6 +354,54 @@ fatigue_generale:
   
   - message: "Tu fonctionnes au ralenti, comme IE en 2005"
     exercise: "Auto-massage : nuque, épaules, visage, 1 minute"
+  
+  - message: "T'as la vitalité d'un légume oublié au frigo"
+    exercise: "Saute sur place 15x, remue-toi le système!"
+  
+  - message: "Ta mitochondrie a fait faillite"
+    exercise: "Expire fort par la bouche 10x, inspire amplement, réveille ton corps"
+  
+  - message: "T'es plus fatigué qu'un hamster après 48h de roue"
+    exercise: "Tapotements : tape tout ton corps avec tes mains, 45s"
+  
+  - message: "Ton niveau d'énergie fait peine à voir"
+    exercise: "Marche vite sur place en levant bien les genoux, 1 minute"
+  
+  - message: "T'as l'enthousiasme d'un lundi matin sous la pluie"
+    exercise: "Étirements dynamiques : bras, jambes, torsions, tout ce qui bouge, 90s"
+  
+  - message: "Tes neurones tournent à la vitesse d'un 56k modem"
+    exercise: "Massage crâne : masse vigoureusement ton cuir chevelu, 30s"
+  
+  - message: "T'es aussi alerte qu'un koala shooté à l'eucalyptus"
+    exercise: "Touche tes orteils, lève les bras au ciel, répète vite 12x"
+  
+  - message: "Ta productivité est en dessous du niveau de la mer"
+    exercise: "Bois un grand verre d'eau, fais 10 squats, reviens conquérant"
+  
+  - message: "T'as le dynamisme d'un pudding"
+    exercise: "Ouvre grande la fenêtre, respire l'air frais 2 minutes"
+  
+  - message: "Ton cerveau tourne en mode économie d'énergie extrême"
+    exercise: "Secoue la tête vigoureusement (pas trop), puis tout le corps, 30s"
+  
+  - message: "T'es plus mou qu'une chaussette mouillée"
+    exercise: "Burpees express (version douce) ou montées de genoux énergiques, 15x"
+  
+  - message: "Ta motivation est partie en vacances sans toi"
+    exercise: "Fais le tour de l'espace en marchant vite, respire fort"
+  
+  - message: "T'as l'allure d'un zombie post-apocalyptique"
+    exercise: "Pompes contre le mur : 12 répétitions pour réveiller le système"
+  
+  - message: "Ton système nerveux est en mode veille prolongée"
+    exercise: "Tapote ton visage avec les doigts, masse les oreilles, 45s"
+  
+  - message: "T'as besoin d'un reboot général, là maintenant"
+    exercise: "Position énergisante : pieds écartés, bras en V, respire fort 8x"
+  
+  - message: "Ta léthargie est impressionnante, négativement"
+    exercise: "Course sur place 30s, étire tout, respire profond - combo revival"
 
 prevention_globale:
   - message: "Checkpoint santé : t'es vivant? Prouve-le 💪"
@@ -145,3 +424,54 @@ prevention_globale:
   
   - message: "Ton corps n'est pas un meuble, traite-le mieux"
     exercise: "Secoue, respire, étire ce que tu veux - mais fais quelque chose!"
+  
+  - message: "Investis dans ta santé avant que ton corps envoie la facture"
+    exercise: "Circuit rapide : 5 squats, 5 étirements bras, 5 respirations profondes"
+  
+  - message: "Ta maintenance corporelle est en retard de plusieurs updates"
+    exercise: "Scan mental : de la tête aux pieds, détends chaque zone tendue"
+  
+  - message: "Le mouvement c'est la vie, l'immobilité c'est ton bureau"
+    exercise: "Mobilise toutes tes articulations : chevilles, genoux, hanches, épaules, cou"
+  
+  - message: "Ton corps accumule plus de tensions qu'un thriller Netflix"
+    exercise: "Bâille à fond, étire-toi comme au réveil, secoue les tensions"
+  
+  - message: "Prévention > guérison (ton ostéopathe approuve)"
+    exercise: "Étire-dos-jambes-bras, une zone à la fois, 2 minutes total"
+  
+  - message: "Ton corps garde le score, et t'es pas en train de gagner"
+    exercise: "Respiration consciente + rotations douces de tout ce qui pivote"
+  
+  - message: "C'est la pause santé, pas négociable"
+    exercise: "Lève-toi, marche en conscience, respire l'air frais si possible"
+  
+  - message: "Ton système musculo-squelettique demande de l'attention"
+    exercise: "Routine mobilité : cou, épaules, dos, hanches, chevilles, 90s"
+  
+  - message: "Balance ton équilibre vie-bureau (spoiler: t'en as pas)"
+    exercise: "Marche, étire, respire, hydrate - les 4 piliers en 3 minutes"
+  
+  - message: "Ton future consultation médicale te remercie pour cette pause"
+    exercise: "Secoue chaque membre, respire profond, étire ce qui crie"
+  
+  - message: "Prends soin de toi avant que ton corps prenne des mesures drastiques"
+    exercise: "Circuit bien-être : 10 respirations + étirements + mini marche"
+  
+  - message: "Ton corps est ton véhicule principal, entretiens-le"
+    exercise: "Check complet : posture, tensions, respiration, corrige ce qui cloche"
+  
+  - message: "L'ergonomie c'est pas juste un mot fancy"
+    exercise: "Ajuste ton setup, étire-toi, bois de l'eau, restart"
+  
+  - message: "Ton corps parle, mais tu scrolls au lieu d'écouter"
+    exercise: "Écoute ton corps : où ça tire? Étire cette zone pendant 1 minute"
+  
+  - message: "Cette notification peut te sauver d'une visite chez le kiné"
+    exercise: "Routine prévention : mobilité articulaire complète + 3 grandes respirations"
+  
+  - message: "C'est pas du temps perdu, c'est de la maintenance vitale"
+    exercise: "Tour complet : étire chaque zone, respire, secoue, réinitialise"
+  
+  - message: "Ton corps fait crédit, mais les intérêts sont élevés"
+    exercise: "Debout, respire, bouge chaque articulation, bois de l'eau - routine essentielle"
