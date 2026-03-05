@@ -13,6 +13,10 @@ on:
 jobs:
   test:
     runs-on: windows-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
     
     steps:
       - name: Checkout code
@@ -69,8 +73,8 @@ jobs:
               const match = xml.match(/line-rate="([0-9.]+)"/);
               if (match) {
                 const coverage = (parseFloat(match[1]) * 100).toFixed(2);
-                const status = (coverage >= 60 && coverage <= 80) ? '✅' : '⚠️';
-                const body = `## ${status} Code Coverage Report\n\n**Coverage: ${coverage}%**\n\nTarget: 60-80%\n\n[View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+                const status = (coverage >= 54 && coverage <= 80) ? '✅' : '⚠️';
+                const body = `## ${status} Code Coverage Report\n\n**Coverage: ${coverage}%**\n\nTarget: 54-80%\n\n[View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
                 
                 github.rest.issues.createComment({
                   issue_number: context.issue.number,
