@@ -11,3 +11,8 @@ dependencies = [
     "pillow>=10.0.0",
     "pyyaml>=6.0.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pyinstaller>=6.0.0",
+]

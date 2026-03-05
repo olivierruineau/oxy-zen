@@ -13,7 +13,33 @@ Application de rappels d'exercices adaptatifs pour ta journée de travail. Parce
 - ⏸️ **Contrôle facile** : Pause/reprise depuis l'icône système
 - 📈 **Statistiques** : Suivi de tes notifications et exercices
 
-## 📥 Installation
+## 📥 Installation (Utilisateur final)
+
+### Installation rapide - Exécutable Windows
+
+**Prérequis** : Windows 10/11 uniquement
+
+**Pas besoin d'installer Python !** 🎉
+
+1. **Télécharge l'exécutable**
+   - Télécharge `OxyZen.exe` depuis la dernière release
+   - Ou demande à un développeur de le générer (voir section développeur ci-dessous)
+
+2. **Lance l'application**
+   - Double-clique sur `OxyZen.exe`
+   - Une fenêtre de check-in apparaîtra pour configurer tes besoins
+   - L'icône apparaîtra dans la barre système (près de l'horloge)
+
+3. **[Optionnel] Configure le démarrage automatique**
+   - Appuie sur `Win + R`, tape `shell:startup` et appuie sur Entrée
+   - Copie `OxyZen.exe` dans ce dossier (ou crée un raccourci)
+   - L'application démarrera automatiquement à chaque connexion Windows
+
+**C'est tout !** L'application ne nécessite aucune installation supplémentaire. 🚀
+
+---
+
+## 📥 Installation (Développeur)
 
 ### Prérequis
 - Python 3.12 ou supérieur
@@ -138,25 +164,162 @@ Catégories disponibles :
 6. Arguments : `run python main.py`
 7. Dossier de démarrage : `C:\Users\TON_USER\Code\oxy-zen`
 
-## 📁 Structure du projet
+## � Générer l'exécutable (Développeur)
+
+### Build de l'exécutable Windows
+
+Pour créer un fichier `OxyZen.exe` autonome distributable :
+
+```powershell
+# Depuis la racine du projet
+.\scripts\build.bat
+```
+
+Le script va :
+1. Installer PyInstaller et les dépendances de développement via `uv`
+2. Utiliser PyInstaller avec la configuration `build.spec`
+3. Générer `dist\OxyZen.exe` (~15-25 MB)
+
+**Fichiers générés** :
+- `dist\OxyZen.exe` : Exécutable final à distribuer
+- `build\` : Fichiers temporaires de build (peut être supprimé)
+
+**Test de l'exécutable** :
+```powershell
+cd dist
+.\OxyZen.exe
+```
+
+**⚠️ Important** : Teste l'exe sur une machine **sans Python installé** pour valider le packaging.
+
+### Configuration PyInstaller
+
+Le fichier `build.spec` configure le packaging :
+- **Mode onefile** : Un seul fichier .exe (portable)
+- **Mode windowed** : Pas de console visible
+- **Données intégrées** : `data/exercises.yaml` embarqué dans l'exe
+- **Imports cachés** : Modules non détectés automatiquement (`pystray`, `PIL._tkinter_finder`)
+- **Compression UPX** : Réduction de la taille de l'exe
+
+### Build manuel (avancé)
+
+```powershell
+# Installer PyInstaller
+uv sync --group dev
+
+# Lancer le build avec PyInstaller
+uv run pyinstaller build.spec --clean
+
+# Options supplémentaires
+uv run pyinstaller build.spec --clean --log-level DEBUG  # Verbose
+```
+## 🚀 Release automatique (Développeur)
+
+### Process de release avec GitHub Actions
+
+Le projet utilise GitHub Actions pour automatiser le build et la création de releases.
+
+**Workflow automatique** :
+1. Tag une version → Déclenche le build
+2. Build Windows automatique avec PyInstaller
+3. Création d'une release GitHub avec l'exe
+4. Package disponible dans les releases
+
+### Créer une release
+
+**Option 1 : Avec le script helper (Recommandé)** 🌟
+
+```powershell
+# Utilise la version de pyproject.toml (actuellement 0.1.0)
+.\scripts\release.ps1
+
+# Ou spécifie une nouvelle version
+.\scripts\release.ps1 -Version 1.0.0
+```
+
+Le script va :
+- ✅ Vérifier que le repo est propre (pas de changements non commités)
+- ✅ Optionnellement mettre à jour `pyproject.toml` avec la nouvelle version
+- ✅ Créer et pusher le tag Git (ex: `v1.0.0`)
+- ✅ Déclencher automatiquement le workflow GitHub Actions
+- ✅ Afficher les liens pour suivre le build et la release
+
+**Option 2 : Manuellement**
+
+```powershell
+# 1. Mettre à jour la version dans pyproject.toml
+#    version = "1.0.0"
+
+# 2. Commiter le changement
+git add pyproject.toml
+git commit -m "chore: bump version to 1.0.0"
+
+# 3. Créer et pusher le tag
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+```
+
+### Suivre le build
+
+Une fois le tag pushé :
+
+1. **Workflow en cours** : https://github.com/olivierruineau/oxy-zen/actions
+   - Vérification de la version (tag = pyproject.toml)
+   - Build Windows (~5 minutes)
+   - Création de la release
+
+2. **Release publiée** : https://github.com/olivierruineau/oxy-zen/releases
+   - `OxyZen.exe` (~18 MB) attaché automatiquement
+   - Notes de release générées depuis les commits
+
+### En cas de problème
+
+Si le build échoue ou tu veux annuler :
+
+```powershell
+# Supprimer le tag localement
+git tag -d v1.0.0
+
+# Supprimer le tag sur GitHub
+git push origin :refs/tags/v1.0.0
+```
+
+### Versionning
+
+Le projet utilise [Semantic Versioning](https://semver.org/lang/fr/) :
+- **MAJOR** (1.0.0) : Changements incompatibles
+- **MINOR** (0.1.0) : Nouvelles fonctionnalités compatibles
+- **PATCH** (0.0.1) : Corrections de bugs
+
+**⚠️ Important** : La version dans `pyproject.toml` et le tag Git doivent correspondre exactement.
+## �📁 Structure du projet
 
 ```
 oxy-zen/
-├── src/                  # Code source principal
-│   ├── app.py           # Application principale
-│   ├── config.py        # Gestion des préférences utilisateur
-│   └── ui/              # Interfaces graphiques
+├── .github/             # Configuration GitHub
+│   └── workflows/
+│       └── release.yml  # Workflow CI/CD (build & release)
+├── src/                 # Code source principal
+│   ├── app.py          # Application principale
+│   ├── config.py       # Gestion des préférences utilisateur
+│   └── ui/             # Interfaces graphiques
 │       ├── checkin_window.py          # Fenêtre de check-in
 │       ├── stats_window.py            # Fenêtre de statistiques
 │       └── notification_config_window.py  # Fenêtre de configuration
-├── data/                # Données de l'application
-│   └── exercises.yaml   # Messages et exercices
-├── scripts/             # Scripts utilitaires
-│   ├── start.bat       # Lancement rapide
-│   └── kill.bat        # Arrêt forcé
-├── main.py             # Point d'entrée
-├── pyproject.toml      # Configuration du projet
-└── README.md           # Ce fichier
+├── data/               # Données de l'application
+│   └── exercises.yaml  # Messages et exercices (embarqué dans l'exe)
+├── scripts/            # Scripts utilitaires
+│   ├── start.bat      # Lancement rapide (dev)
+│   ├── build.bat      # Build local PyInstaller
+│   ├── release.ps1    # Helper pour créer des releases
+│   └── kill.bat       # Arrêt forcé
+├── dist/               # Exécutable généré (après build)
+│   └── OxyZen.exe     # Distributable final (~18 MB)
+├── build/              # Fichiers temporaires PyInstaller (après build)
+├── main.py            # Point d'entrée
+├── build.spec         # Configuration PyInstaller
+├── pyproject.toml     # Configuration du projet (version + dépendances)
+└── README.md          # Ce fichier
 ```
 
 ## 🔍 Fichiers de configuration
