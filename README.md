@@ -378,7 +378,40 @@ Exemple : Si tu coches "Dos" et "Yeux"
 - Prévention globale : 30% de chances
 - Autres catégories : ~1% chacune
 
-## 🤝 Contribution
+## � Tests
+
+Le projet utilise `pytest` pour garantir la qualité du code avec des tests unitaires et d'intégration.
+
+### Lancer les tests
+
+```powershell
+# Installation des dépendances de test
+uv sync --all-groups
+
+# Exécuter tous les tests
+uv run pytest
+
+# Avec rapport de couverture
+uv run pytest --cov=src --cov-report=term-missing
+```
+
+### Couverture de code
+
+- **Couverture totale : ~55-60%**
+- `src/config.py` : 97% ✅
+- `src/app.py` : 72% ✅
+- `src/ui/*` : 15-20% (tests manuels recommandés)
+
+### CI/CD
+
+Les tests s'exécutent automatiquement sur chaque Pull Request vers `main` :
+- Validation de la couverture (objectif : 60-80%)
+- Rapport automatique dans les commentaires PR
+- Configuration : [.github/workflows/tests.yml](.github/workflows/tests.yml)
+
+Pour plus de détails, voir [tests/README.md](tests/README.md).
+
+## �🤝 Contribution
 
 Tu veux ajouter tes propres messages sarcastiques ? Édite `exercises.yaml` et partage tes meilleures répliques! 😄
 
