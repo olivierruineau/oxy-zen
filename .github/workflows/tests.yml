@@ -130,14 +130,29 @@ jobs:
         run: |
           if (Test-Path pip-audit-report.json) {
             $audit = Get-Content pip-audit-report.json | ConvertFrom-Json
+            $vulnFound = $false
+            $vulnCount = 0
+            
             if ($audit.dependencies) {
-              Write-Host "⚠️ Vulnerabilities found:"
-              $audit.dependencies | ForEach-Object {
-                Write-Host "  - $($_.name) $($_.version): $($_.vulns.Count) vulnerabilities"
+              foreach ($dep in $audit.dependencies) {
+                if ($dep.vulns.Count -gt 0) {
+                  if (-not $vulnFound) {
+                    Write-Host "⚠️ Vulnerabilities found:"
+                    $vulnFound = $true
+                  }
+                  Write-Host "  - $($dep.name) $($dep.version): $($dep.vulns.Count) vulnerabilities"
+                  $vulnCount += $dep.vulns.Count
+                }
               }
+            }
+            
+            if ($vulnFound) {
+              Write-Host ""
+              Write-Host "Total: $vulnCount vulnerabilities detected"
               exit 1
             } else {
               Write-Host "✅ No vulnerabilities found"
+              Write-Host "   Scanned $($audit.dependencies.Count) dependencies"
             }
           } else {
             Write-Host "✅ No vulnerabilities found"
