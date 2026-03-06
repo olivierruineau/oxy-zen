@@ -25,12 +25,12 @@
 - [x] Tester avec inputs invalides
 - [x] Afficher message erreur user-friendly
 
-### Atomic Config Write (CRITIQUE)
-- [ ] Implémenter write to temp file
-- [ ] Implémenter atomic rename
-- [ ] Ajouter cleanup sur erreur
-- [ ] Tester avec kill process pendant save
-- [ ] Vérifier config pas corrompue
+### Atomic Config Write (CRITIQUE) ✅
+- [x] Implémenter write to temp file
+- [x] Implémenter atomic rename
+- [x] Ajouter cleanup sur erreur
+- [x] Tester avec kill process pendant save
+- [x] Vérifier config pas corrompue
 
 ---
 

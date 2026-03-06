@@ -1,6 +1,7 @@
 """Module de gestion de la configuration utilisateur pour Oxy-Zen."""
 
 import json
+import os
 import threading
 from pathlib import Path
 from datetime import datetime
@@ -68,7 +69,7 @@ class UserPreferences:
             self.calculate_weights()
     
     def save(self):
-        """Sauvegarde la configuration dans le fichier JSON."""
+        """Sauvegarde la configuration dans le fichier JSON de manière atomique."""
         with self._lock:
             data = {
                 "problem_areas": self.problem_areas,
@@ -77,10 +78,30 @@ class UserPreferences:
                 "stats": self.stats,
                 "notification_config": self.notification_config,
             }
+            
+            # Écriture atomique : écrire dans un fichier temporaire puis renommer
+            temp_file = self.CONFIG_FILE.with_suffix('.tmp')
+            
             try:
-                with open(self.CONFIG_FILE, 'w', encoding='utf-8') as f:
+                # Étape 1 : Écrire dans le fichier temporaire
+                with open(temp_file, 'w', encoding='utf-8') as f:
                     json.dump(data, f, indent=2, ensure_ascii=False)
-            except IOError as e:
+                    # Forcer l'écriture sur disque avant le rename
+                    f.flush()
+                    os.fsync(f.fileno())
+                
+                # Étape 2 : Renommer atomiquement (remplace l'ancien fichier)
+                # os.replace() est atomique sur Windows, Linux et macOS
+                os.replace(temp_file, self.CONFIG_FILE)
+                
+            except (IOError, OSError) as e:
+                # Cleanup : supprimer le fichier temporaire en cas d'erreur
+                if temp_file.exists():
+                    try:
+                        temp_file.unlink()
+                    except OSError:
+                        pass  # Ignorer l'erreur de suppression
+                
                 print(f"Erreur lors de la sauvegarde de la config: {e}")
     
     def update_notification_config(self, config: Dict):
