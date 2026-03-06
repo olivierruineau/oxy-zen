@@ -6,6 +6,10 @@ import threading
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
+from src.logging_config import get_logger
+from src import constants
+
+logger = get_logger(__name__)
 
 
 class UserPreferences:
@@ -38,12 +42,12 @@ class UserPreferences:
         }
         # Ajout config notification (fréquence en minutes, moment en minutes)
         self.notification_config = {
-            "frequency": 30,  # par défaut toutes les 30 min
-            "moment": 0,      # par défaut à l'heure pile
-            "start_hour": 7,  # heure de début de travail
-            "start_minute": 30,
-            "end_hour": 16,   # heure de fin de travail
-            "end_minute": 0,
+            "frequency": constants.DEFAULT_NOTIFICATION_FREQUENCY,
+            "moment": constants.DEFAULT_NOTIFICATION_MOMENT,
+            "start_hour": constants.DEFAULT_START_HOUR,
+            "start_minute": constants.DEFAULT_START_MINUTE,
+            "end_hour": constants.DEFAULT_END_HOUR,
+            "end_minute": constants.DEFAULT_END_MINUTE,
         }
         # Créer le répertoire de config si nécessaire
         self.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -102,7 +106,7 @@ class UserPreferences:
                     except OSError:
                         pass  # Ignorer l'erreur de suppression
                 
-                print(f"Erreur lors de la sauvegarde de la config: {e}")
+                logger.error(f"Erreur lors de la sauvegarde de la config: {e}", exc_info=True)
     
     def update_notification_config(self, config: Dict):
         """Met à jour la configuration des notifications et sauvegarde."""
@@ -132,16 +136,16 @@ class UserPreferences:
             self.weights["prevention_globale"] = 1.0
         else:
             # 70% réparti sur les zones à problème
-            problem_weight = 0.7 / len(self.problem_areas)
+            problem_weight = constants.PROBLEM_AREAS_WEIGHT / len(self.problem_areas)
             
             for cat in self.CATEGORIES:
                 if cat in self.problem_areas:
                     self.weights[cat] = problem_weight
                 else:
-                    self.weights[cat] = 0.01  # Petit poids résiduel
+                    self.weights[cat] = constants.RESIDUAL_WEIGHT  # Petit poids résiduel
             
             # 30% pour la prévention globale
-            self.weights["prevention_globale"] = 0.3
+            self.weights["prevention_globale"] = constants.PREVENTION_WEIGHT
     
     def increment_notification_count(self):
         """Incrémente le compteur de notifications envoyées."""
@@ -159,9 +163,9 @@ class UserPreferences:
         with self._lock:
             self.stats["exercises_done"].append(entry)
             
-            # Garder seulement les 20 derniers
-            if len(self.stats["exercises_done"]) > 20:
-                self.stats["exercises_done"] = self.stats["exercises_done"][-20:]
+            # Garder seulement les N derniers
+            if len(self.stats["exercises_done"]) > constants.MAX_EXERCISE_HISTORY:
+                self.stats["exercises_done"] = self.stats["exercises_done"][-constants.MAX_EXERCISE_HISTORY:]
         
         self.save()
     

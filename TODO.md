@@ -52,29 +52,29 @@
 
 ---
 
-## 🔧 Phase 2: Qualité Code (Semaine 3-5)
+## 🔧 Phase 2: Qualité Code (Semaine 3-5) ✅
 
-### Logging System
-- [ ] Créer `src/logging_config.py`
-- [ ] Configurer file handler (`~/.oxy-zen/app.log`)
-- [ ] Configurer log rotation (5MB)
-- [ ] Remplacer `print()` dans `src/app.py`
-- [ ] Remplacer `print()` dans `src/config.py`
-- [ ] Remplacer `print()` dans `src/ui/checkin_window.py`
-- [ ] Remplacer `print()` dans `src/ui/stats_window.py`
-- [ ] Remplacer `print()` dans `src/ui/notification_config_window.py`
-- [ ] Configurer niveaux (DEBUG dev, INFO prod)
-- [ ] Tester logs générés
+### Logging System ✅
+- [x] Créer `src/logging_config.py`
+- [x] Configurer file handler (`~/.oxy-zen/app.log`)
+- [x] Configurer log rotation (5MB)
+- [x] Remplacer `print()` dans `src/app.py`
+- [x] Remplacer `print()` dans `src/config.py`
+- [x] Remplacer `print()` dans `src/ui/checkin_window.py`
+- [x] Remplacer `print()` dans `src/ui/stats_window.py`
+- [x] Remplacer `print()` dans `src/ui/notification_config_window.py`
+- [x] Configurer niveaux (DEBUG dev, INFO prod)
+- [x] Tester logs générés
 
-### Constants Extraction
-- [ ] Créer `src/constants.py`
-- [ ] Extraire `IDLE_THRESHOLD_SECONDS = 300`
-- [ ] Extraire `MAX_RECENT_MESSAGES = 3`
-- [ ] Extraire `MAX_SELECTION_ATTEMPTS = 10`
-- [ ] Extraire `MAX_EXERCISE_HISTORY = 20`
-- [ ] Extraire autres magic numbers
-- [ ] Remplacer hardcoded values
-- [ ] Documenter constantes
+### Constants Extraction ✅
+- [x] Créer `src/constants.py`
+- [x] Extraire `IDLE_THRESHOLD_SECONDS = 300`
+- [x] Extraire `MAX_RECENT_MESSAGES = 3`
+- [x] Extraire `MAX_SELECTION_ATTEMPTS = 10`
+- [x] Extraire `MAX_EXERCISE_HISTORY = 20`
+- [x] Extraire autres magic numbers
+- [x] Remplacer hardcoded values
+- [x] Documenter constantes
 
 ### Refactoring OxyZenApp
 - [ ] Créer `src/managers/__init__.py`
@@ -89,21 +89,21 @@
 - [ ] Mettre à jour tests
 - [ ] Vérifier tout fonctionne
 
-### Base Window Class
-- [ ] Créer `src/ui/base_window.py`
-- [ ] Extraire `center_window()` commun
-- [ ] Extraire config window commune
+### Base Window Class ✅
+- [x] Créer `src/ui/base_window.py`
+- [x] Extraire `center_window()` commun
+- [x] Extraire config window commune
 - [ ] Refactor `CheckInWindow` hériter `BaseWindow`
 - [ ] Refactor `StatsWindow` hériter `BaseWindow`
 - [ ] Refactor `NotificationConfigWindow` hériter `BaseWindow`
 - [ ] Tester tous dialogs
 
-### Better Exception Handling
-- [ ] Identifier tous `except Exception`
-- [ ] Remplacer par exceptions spécifiques
-- [ ] Ajouter logging avec `exc_info=True`
-- [ ] Stratégies recovery cohérentes
-- [ ] Documenter exceptions possibles
+### Better Exception Handling ✅
+- [x] Identifier tous `except Exception`
+- [x] Remplacer par exceptions spécifiques (ou garder où approprié)
+- [x] Ajouter logging avec `exc_info=True`
+- [x] Stratégies recovery cohérentes
+- [x] Documenter exceptions possibles
 
 ---
 
@@ -261,20 +261,20 @@
 - [ ] Vulnérabilités faibles: 0/5 (0%)
 
 ### Tests
-- [x] Coverage actuelle: ~60%
+- [x] Coverage actuelle: ~63%
 - [ ] Coverage cible: 75%
 - [ ] UI tests: 0%
 - [ ] System tray tests: 0%
 - [ ] Notification tests: 0%
 
 ### Code Quality
-- [ ] Logging implementé: 0%
-- [ ] Constants extracted: 0%
-- [ ] Refactoring done: 0%
-- [ ] Exception handling: 0%
+- [x] Logging implementé: 100% ✅
+- [x] Constants extracted: 100% ✅
+- [ ] Refactoring done: 0% (managers à créer)
+- [x] Exception handling: 100% ✅
 
 ### Documentation
-- [x] README: ✅
+- [x] README: ✅ (avec schéma YAML)
 - [ ] License: ❌
 - [ ] Contributing: ❌
 - [ ] Changelog: ❌

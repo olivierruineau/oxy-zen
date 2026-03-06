@@ -21,6 +21,11 @@ from PIL import Image, ImageDraw
 
 from .config import UserPreferences
 from .ui import show_checkin_dialog, show_stats_window
+from .logging_config import get_logger, setup_logging
+from . import constants
+
+# Initialiser le logging au niveau module
+logger = get_logger(__name__)
 
 
 def get_base_path() -> Path:
@@ -54,7 +59,7 @@ def get_idle_duration() -> int:
         else:
             return 0
     except Exception as e:
-        print(f"❌ Erreur détection inactivité: {e}")
+        logger.error(f"Erreur détection inactivité: {e}", exc_info=True)
         return 0
 
 
@@ -69,7 +74,7 @@ def is_session_locked() -> bool:
             ctypes.windll.user32.CloseDesktop(hDesktop)
             return False  # Session active
     except Exception as e:
-        print(f"❌ Erreur détection verrouillage: {e}")
+        logger.error(f"Erreur détection verrouillage: {e}", exc_info=True)
         return False
 
 
@@ -92,9 +97,9 @@ class ExerciseSelector:
         try:
             # Charger et valider le fichier d'exercices de manière sécurisée
             self.exercises = load_and_validate_exercises(self.exercises_file, self.allowed_dir)
-            print(f"✅ {sum(len(exs) for exs in self.exercises.values())} exercices chargés")
+            logger.info(f"{sum(len(exs) for exs in self.exercises.values())} exercices chargés")
         except SecurityError as e:
-            print(f"⚠️ Erreur de sécurité lors du chargement des exercices: {e}")
+            logger.warning(f"Erreur de sécurité lors du chargement des exercices: {e}")
             # Fallback avec un exercice par défaut
             self.exercises = {
                 "prevention_globale": [{
@@ -103,7 +108,7 @@ class ExerciseSelector:
                 }]
             }
         except Exception as e:
-            print(f"❌ Erreur lors du chargement des exercices: {e}")
+            logger.error(f"Erreur lors du chargement des exercices: {e}", exc_info=True)
             # Fallback avec un exercice par défaut
             self.exercises = {
                 "prevention_globale": [{
@@ -143,16 +148,16 @@ class ExerciseSelector:
         # Sélectionner un exercice aléatoire dans cette catégorie
         available_exercises = self.exercises[selected_category]
         
-        # Éviter la répétition des 3 derniers messages
+        # Éviter la répétition des N derniers messages
         attempts = 0
-        while attempts < 10:  # Limite pour éviter boucle infinie
+        while attempts < constants.MAX_SELECTION_ATTEMPTS:  # Limite pour éviter boucle infinie
             exercise = random.choice(available_exercises)
             message = exercise['message']
             
-            if message not in self.recent_messages or len(available_exercises) <= 3:
-                # Ajouter au cache et limiter à 3 derniers
+            if message not in self.recent_messages or len(available_exercises) <= constants.MAX_RECENT_MESSAGES:
+                # Ajouter au cache et limiter à N derniers
                 self.recent_messages.append(message)
-                if len(self.recent_messages) > 3:
+                if len(self.recent_messages) > constants.MAX_RECENT_MESSAGES:
                     self.recent_messages.pop(0)
                 
                 return (selected_category, message, exercise['exercise'])
@@ -172,13 +177,13 @@ class OxyZenApp:
         from .ui import show_notification_config_window
         def on_save(config):
             self.preferences.update_notification_config(config)
-            print(f"✅ Config notification sauvegardée: {config}")
+            logger.info(f"Config notification sauvegardée: {config}")
             # Reconfigurer le scheduler pour appliquer les nouveaux horaires
             schedule.clear()
             self.notification_jobs.clear()
             self.setup_schedule()
             self.update_icon_menu()
-            print("✅ Horaires de notification mis à jour")
+            logger.info("É Horaires de notification mis à jour")
         # Lancer dans un thread pour ne pas bloquer l'UI principale
         import threading
         thread = threading.Thread(target=lambda: show_notification_config_window(self.preferences.notification_config, on_save), daemon=True)
@@ -211,9 +216,9 @@ class OxyZenApp:
         self.notification_jobs = []
         
         # Seuil d'inactivité (en secondes) avant de considérer l'utilisateur absent
-        self.idle_threshold = 300  # 5 minutes par défaut
+        self.idle_threshold = constants.IDLE_THRESHOLD_SECONDS
         
-        print("🧘 Oxy-Zen démarré!")
+        logger.info("Oxy-Zen démarré!")
     
     @property
     def paused(self) -> bool:
@@ -279,19 +284,19 @@ class OxyZenApp:
             # Mettre à jour le menu pour activer le bouton snooze
             self.update_icon_menu()
             
-            print(f"📬 Notification envoyée: {message}")
+            logger.info(f"Notification envoyée: {message}")
             
         except Exception as e:
-            print(f"❌ Erreur notification: {e}")
+            logger.error(f"Erreur notification: {e}", exc_info=True)
     
     def snooze_notification(self):
         """Rappelle la dernière notification après 5 minutes."""
         if self.last_notification:
             category, message, exercise = self.last_notification
-            print("⏰ Snooze - notification dans 5 minutes")
+            logger.info("Snooze - notification dans 5 minutes")
             
             def send_snooze():
-                time.sleep(300)  # 5 minutes
+                time.sleep(constants.SNOOZE_DURATION_SECONDS)
                 if not self.paused:
                     self.send_notification(category, message, exercise)
             
@@ -301,12 +306,12 @@ class OxyZenApp:
     def notification_job(self):
         """Job de notification (appelé par le scheduler)."""
         if self.paused:
-            print("⏸️  En pause, notification ignorée")
+            logger.debug("En pause, notification ignorée")
             return
         
         # Vérifier l'heure de pause si définie
         if self.pause_until and datetime.now() < self.pause_until:
-            print("⏸️  En pause temporaire")
+            logger.debug("En pause temporaire")
             return
         else:
             self.pause_until = None
@@ -314,14 +319,14 @@ class OxyZenApp:
         
         # Vérifier si la session est verrouillée
         if is_session_locked():
-            print("🔒 Session verrouillée, notification ignorée")
+            logger.debug("Session verrouillée, notification ignorée")
             return
         
         # Vérifier le temps d'inactivité
         idle_time = get_idle_duration()
         if idle_time >= self.idle_threshold:
             idle_minutes = int(idle_time / 60)
-            print(f"💤 Utilisateur inactif ({idle_minutes} min), notification ignorée")
+            logger.debug(f"Utilisateur inactif ({idle_minutes} min), notification ignorée")
             return
         
         # Sélectionner un exercice
@@ -335,7 +340,7 @@ class OxyZenApp:
         if self.paused:
             return
         
-        print("🔔 Check-in quotidien!")
+        logger.info("Check-in quotidien!")
         self.show_checkin()
     
     def show_checkin(self):
@@ -343,7 +348,7 @@ class OxyZenApp:
         def callback(areas):
             if areas is not None:
                 self.preferences.update_problem_areas(areas)
-                print(f"✅ Zones mises à jour: {areas}")
+                logger.info(f"Zones mises à jour: {areas}")
                 # Recharger les poids dans le selector
                 self.selector.preferences = self.preferences
                 # Mettre à jour le menu après changement
@@ -371,16 +376,16 @@ class OxyZenApp:
         """Configure les tâches planifiées."""
         # Récupérer les paramètres de configuration
         config = self.preferences.notification_config
-        frequency = config.get("frequency", 30)  # en minutes
-        moment = config.get("moment", 0)  # offset en minutes
-        start_hour = config.get("start_hour", 7)
-        start_minute = config.get("start_minute", 30)
-        end_hour = config.get("end_hour", 16)
-        end_minute = config.get("end_minute", 0)
+        frequency = config.get("frequency", constants.DEFAULT_NOTIFICATION_FREQUENCY)
+        moment = config.get("moment", constants.DEFAULT_NOTIFICATION_MOMENT)
+        start_hour = config.get("start_hour", constants.DEFAULT_START_HOUR)
+        start_minute = config.get("start_minute", constants.DEFAULT_START_MINUTE)
+        end_hour = config.get("end_hour", constants.DEFAULT_END_HOUR)
+        end_minute = config.get("end_minute", constants.DEFAULT_END_MINUTE)
         
         # Si fréquence = 0 (Jamais), ne rien programmer
         if frequency == 0:
-            print("⚠️ Notifications désactivées")
+            logger.warning("Notifications désactivées")
             return
         
         # Notifications entre les horaires configurés, lun-ven
@@ -406,20 +411,20 @@ class OxyZenApp:
                 hour += 1
         
         # Check-in quotidien une fois par jour (heure aléatoire entre 10h et 14h)
-        checkin_hour = random.randint(10, 13)
+        checkin_hour = random.randint(constants.CHECKIN_HOUR_MIN, constants.CHECKIN_HOUR_MAX)
         checkin_minute = random.randint(0, 59)
         checkin_time = f"{checkin_hour:02d}:{checkin_minute:02d}"
         schedule.every().day.at(checkin_time).do(self.checkin_job)
         
-        print(f"📅 Notifications programmées: {', '.join(notification_times)}")
-        print(f"📅 Check-in quotidien: {checkin_time}")
+        logger.info(f"Notifications programmées: {', '.join(notification_times)}")
+        logger.info(f"Check-in quotidien: {checkin_time}")
     
     def should_run_now(self) -> bool:
         """Vérifie si on doit exécuter les jobs maintenant (horaires et jours)."""
         now = datetime.now()
         
         # Vérifier le jour (lundi=0, dimanche=6)
-        if now.weekday() >= 5:  # Weekend
+        if now.weekday() >= constants.SATURDAY:  # Weekend
             return False
         
         # Vérifier l'heure avec les horaires configurés
@@ -435,20 +440,20 @@ class OxyZenApp:
         while self.running:
             # Ne vérifier les jobs que les jours de semaine
             now = datetime.now()
-            if now.weekday() < 5:  # Lundi à vendredi seulement
+            if now.weekday() < constants.SATURDAY:  # Lundi à vendredi seulement
                 schedule.run_pending()
             
             # Actualiser le menu pour que l'info "Prochaine notification" soit à jour
             self.update_icon_menu()
             
-            time.sleep(60)  # Vérifier toutes les minutes
+            time.sleep(constants.SCHEDULE_CHECK_INTERVAL)  # Vérifier toutes les minutes
     
     def pause_for_hour(self):
         """Met en pause pour 1 heure."""
         from datetime import timedelta
         self.paused = True
         self.pause_until = datetime.now() + timedelta(hours=1)
-        print("⏸️  Pause 1 heure")
+        logger.info("Pause 1 heure")
         self.update_icon_menu()
     
     def pause_until_tomorrow(self):
@@ -464,14 +469,14 @@ class OxyZenApp:
             second=0, 
             microsecond=0
         )
-        print("⏸️  Pause jusqu'à demain")
+        logger.info("Pause jusqu'à demain")
         self.update_icon_menu()
     
     def resume(self):
         """Reprend les notifications."""
         self.paused = False
         self.pause_until = None
-        print("▶️  Reprise")
+        logger.info("Reprise")
         self.update_icon_menu()
     
     def trigger_notification_now(self):
@@ -480,28 +485,32 @@ class OxyZenApp:
         if result:
             category, message, exercise = result
             self.send_notification(category, message, exercise)
-            print("🔔 Notification déclenchée manuellement")
+            logger.info("Notification déclenchée manuellement")
         else:
-            print("❌ Impossible de sélectionner un exercice")
+            logger.warning("Impossible de sélectionner un exercice")
     
     def quit_app(self, icon=None, item=None):
         """Quitte l'application."""
-        print("👋 Arrêt d'Oxy-Zen")
+        logger.info("Arrêt d'Oxy-Zen")
         self.running = False
         if self.icon:
             self.icon.stop()
     
     def create_icon_image(self):
         """Crée une image d'icône simple."""
-        # Créer une image 64x64 avec un cercle et "OZ"
-        img = Image.new('RGB', (64, 64), color='#3498db')
+        # Créer une image avec un cercle et "OZ"
+        img = Image.new('RGB', (constants.ICON_SIZE, constants.ICON_SIZE), color='#3498db')
         draw = ImageDraw.Draw(img)
         
         # Cercle blanc
-        draw.ellipse([8, 8, 56, 56], fill='white', outline='#2980b9', width=3)
+        margin = constants.ICON_SIZE // 8
+        draw.ellipse([margin, margin, constants.ICON_SIZE - margin, constants.ICON_SIZE - margin], 
+                     fill='white', outline='#2980b9', width=3)
         
         # Texte "🧘" ou "OZ" (approximation)
-        draw.text((20, 18), "OZ", fill='#3498db')
+        text_x = constants.ICON_SIZE // 3
+        text_y = constants.ICON_SIZE // 4
+        draw.text((text_x, text_y), "OZ", fill='#3498db')
         
         return img
     
@@ -546,14 +555,12 @@ class OxyZenApp:
             
             # Fallback: retourner heure de début demain
             config = self.preferences.notification_config
-            start_hour = config.get("start_hour", 7)
-            start_minute = config.get("start_minute", 30)
+            start_hour = config.get("start_hour", constants.DEFAULT_START_HOUR)
+            start_minute = config.get("start_minute", constants.DEFAULT_START_MINUTE)
             return f"Demain {start_hour:02d}:{start_minute:02d}"
             
         except Exception as e:
-            print(f"❌ Erreur calcul prochaine notification: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.error(f"Erreur calcul prochaine notification: {e}", exc_info=True)
             return None
     
     def update_icon_menu(self):
@@ -601,7 +608,7 @@ class OxyZenApp:
         """Lance l'application."""
         # Check-in initial si nécessaire
         if self.preferences.needs_initial_checkin():
-            print("👋 Premier lancement! Faisons un check-in initial...")
+            logger.info("Premier lancement! Check-in initial nécessaire")
             # Le check-in sera dans un thread séparé
             self.show_checkin()
             # Petit délai pour laisser la fenêtre s'ouvrir
@@ -622,15 +629,24 @@ class OxyZenApp:
 
 def main():
     """Point d'entrée principal."""
+    import os
+    
+    # Initialiser le logging (niveau configurable via variable d'environn ement)
+    log_level = os.getenv("OXY_ZEN_LOG_LEVEL", "INFO")
+    setup_logging(log_level)
+    
+    main_logger = get_logger("main")
+    main_logger.info("="*50)
+    main_logger.info("Démarrage d'Oxy-Zen")
+    main_logger.info("="*50)
+    
     app = OxyZenApp()
     try:
         app.run()
     except KeyboardInterrupt:
-        print("\n👋 Arrêt via Ctrl+C")
+        main_logger.info("Arrêt via Ctrl+C")
     except Exception as e:
-        print(f"❌ Erreur: {e}")
-        import traceback
-        traceback.print_exc()
+        main_logger.critical(f"Erreur critique: {e}", exc_info=True)
 
 
 if __name__ == "__main__":
