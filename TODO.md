@@ -17,13 +17,13 @@
 - [x] Ajouter tests de concurrence
 - [x] Tester pause/reprise rapide
 
-### Validation Input UI (CRITIQUE)
-- [ ] Ajouter validation dans `NotificationConfigWindow.save()`
-- [ ] Vérifier `start_hour < end_hour`
-- [ ] Valider heures 0-23
-- [ ] Valider minutes 0-59
-- [ ] Tester avec inputs invalides
-- [ ] Afficher message erreur user-friendly
+### Validation Input UI (CRITIQUE) ✅
+- [x] Ajouter validation dans `NotificationConfigWindow.save()`
+- [x] Vérifier `start_hour < end_hour`
+- [x] Valider heures 0-23
+- [x] Valider minutes 0-59
+- [x] Tester avec inputs invalides
+- [x] Afficher message erreur user-friendly
 
 ### Atomic Config Write (CRITIQUE)
 - [ ] Implémenter write to temp file
