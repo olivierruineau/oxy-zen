@@ -68,6 +68,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # Optionnel : ajouter un fichier .ico ici
-    version_file=None,  # Optionnel : fichier de version Windows
+    icon=None,  # TODO: ajouter assets/icon.ico
+    version_file='version_info.txt',  # Métadonnées Windows
 )
