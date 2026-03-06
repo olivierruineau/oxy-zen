@@ -34,21 +34,21 @@
 
 ---
 
-## 📋 Phase 1: Sécurité (Semaine 1-2)
+## 📋 Phase 1: Sécurité (Semaine 1-2) ✅
 
-### Path Validation
-- [ ] Créer constante `ALLOWED_DATA_DIR`
-- [ ] Valider `exercises_file` dans répertoire autorisé
-- [ ] Rejeter path traversal attempts
-- [ ] Logger tentatives suspectes
-- [ ] Ajouter tests
+### Path Validation ✅
+- [x] Créer constante `ALLOWED_DATA_DIR`
+- [x] Valider `exercises_file` dans répertoire autorisé
+- [x] Rejeter path traversal attempts
+- [x] Logger tentatives suspectes
+- [x] Ajouter tests
 
-### YAML Schema Validation
-- [ ] Définir schéma attendu
-- [ ] Créer fonction `validate_exercises_schema()`
-- [ ] Valider après `yaml.safe_load()`
-- [ ] Message erreur clair si invalide
-- [ ] Documenter schéma dans README
+### YAML Schema Validation ✅
+- [x] Définir schéma attendu
+- [x] Créer fonction `validate_exercises_schema()`
+- [x] Valider après `yaml.safe_load()`
+- [x] Message erreur clair si invalide
+- [x] Documenter schéma dans README
 
 ---
 

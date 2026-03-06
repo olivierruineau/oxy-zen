@@ -144,6 +144,48 @@ Catégories disponibles :
 - `fatigue_generale` : Exercices énergisants
 - `prevention_globale` : Exercices de prévention générale
 
+### Format et validation du YAML
+
+Le fichier `data/exercises.yaml` est automatiquement validé au démarrage de l'application pour garantir la sécurité et la cohérence des données.
+
+**Schéma requis** :
+
+```yaml
+categorie_nom:
+  - message: "Message sarcastique ou motivant"
+    exercise: "Instructions précises de l'exercice"
+  - message: "Autre message"
+    exercise: "Autres instructions"
+```
+
+**Règles de validation** :
+- Le fichier doit être un dictionnaire valide (format YAML)
+- Chaque catégorie doit être une chaîne de caractères non vide
+- Chaque catégorie contient une liste d'exercices
+- Chaque exercice doit avoir les champs obligatoires :
+  - `message` : Chaîne de caractères non vide (message affiché dans la notification)
+  - `exercise` : Chaîne de caractères non vide (instructions de l'exercice)
+
+**Sécurité** :
+- Le fichier `exercises.yaml` doit être situé dans le répertoire `data/` du projet
+- Les tentatives d'accès à des fichiers en dehors de ce répertoire (path traversal) sont bloquées
+- Les erreurs de validation sont loguées dans `~/.oxy-zen/app.log`
+
+**Exemple complet** :
+```yaml
+dos:
+  - message: "Ton dos appelle son avocat 🦴"
+    exercise: "Étire-toi en arrière pendant 30 secondes, mains sur les hanches"
+  - message: "Tes lombaires demandent justice"
+    exercise: "Rotations du bassin, 10 fois dans chaque sens"
+
+yeux:
+  - message: "Tes yeux font grève 👀"
+    exercise: "Regarde un point éloigné (6m+) pendant 20 secondes"
+```
+
+Si le fichier est invalide ou corrompu, l'application charge automatiquement un ensemble d'exercices de secours pour continuer à fonctionner.
+
 ## 🔧 Lancement automatique au démarrage
 
 ### Option 1 : Dossier de démarrage Windows

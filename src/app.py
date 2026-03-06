@@ -76,20 +76,32 @@ def is_session_locked() -> bool:
 class ExerciseSelector:
     """Gère le chargement et la sélection pondérée des exercices."""
     
-    def __init__(self, exercises_file: Path, preferences: UserPreferences):
+    def __init__(self, exercises_file: Path, preferences: UserPreferences, allowed_dir: Path = None):
         self.exercises_file = exercises_file
         self.preferences = preferences
         self.exercises: Dict[str, List[Dict]] = {}
         self.recent_messages = []  # Cache anti-répétition
+        self.allowed_dir = allowed_dir  # Pour les tests et la validation de sécurité
         
         self.load_exercises()
     
     def load_exercises(self):
-        """Charge les exercices depuis le fichier YAML."""
+        """Charge les exercices depuis le fichier YAML de manière sécurisée."""
+        from .security import load_and_validate_exercises, SecurityError
+        
         try:
-            with open(self.exercises_file, 'r', encoding='utf-8') as f:
-                self.exercises = yaml.safe_load(f)
+            # Charger et valider le fichier d'exercices de manière sécurisée
+            self.exercises = load_and_validate_exercises(self.exercises_file, self.allowed_dir)
             print(f"✅ {sum(len(exs) for exs in self.exercises.values())} exercices chargés")
+        except SecurityError as e:
+            print(f"⚠️ Erreur de sécurité lors du chargement des exercices: {e}")
+            # Fallback avec un exercice par défaut
+            self.exercises = {
+                "prevention_globale": [{
+                    "message": "Bouge un peu!",
+                    "exercise": "Fais des étirements"
+                }]
+            }
         except Exception as e:
             print(f"❌ Erreur lors du chargement des exercices: {e}")
             # Fallback avec un exercice par défaut
