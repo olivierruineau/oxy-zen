@@ -1,6 +1,7 @@
 """Module de gestion de la configuration utilisateur pour Oxy-Zen."""
 
 import json
+import threading
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
@@ -23,6 +24,9 @@ class UserPreferences:
     ]
     
     def __init__(self):
+        # Lock pour protéger les accès multi-threads
+        self._lock = threading.Lock()
+        
         self.problem_areas: List[str] = []
         self.last_checkin: str = ""
         self.weights: Dict[str, float] = {}
@@ -65,18 +69,19 @@ class UserPreferences:
     
     def save(self):
         """Sauvegarde la configuration dans le fichier JSON."""
-        data = {
-            "problem_areas": self.problem_areas,
-            "last_checkin": self.last_checkin,
-            "weights": self.weights,
-            "stats": self.stats,
-            "notification_config": self.notification_config,
-        }
-        try:
-            with open(self.CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-        except IOError as e:
-            print(f"Erreur lors de la sauvegarde de la config: {e}")
+        with self._lock:
+            data = {
+                "problem_areas": self.problem_areas,
+                "last_checkin": self.last_checkin,
+                "weights": self.weights,
+                "stats": self.stats,
+                "notification_config": self.notification_config,
+            }
+            try:
+                with open(self.CONFIG_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+            except IOError as e:
+                print(f"Erreur lors de la sauvegarde de la config: {e}")
     
     def update_notification_config(self, config: Dict):
         """Met à jour la configuration des notifications et sauvegarde."""
@@ -119,7 +124,8 @@ class UserPreferences:
     
     def increment_notification_count(self):
         """Incrémente le compteur de notifications envoyées."""
-        self.stats["total_notifications"] += 1
+        with self._lock:
+            self.stats["total_notifications"] += 1
         self.save()
     
     def add_exercise_to_history(self, category: str, message: str):
@@ -129,11 +135,12 @@ class UserPreferences:
             "category": category,
             "message": message,
         }
-        self.stats["exercises_done"].append(entry)
-        
-        # Garder seulement les 20 derniers
-        if len(self.stats["exercises_done"]) > 20:
-            self.stats["exercises_done"] = self.stats["exercises_done"][-20:]
+        with self._lock:
+            self.stats["exercises_done"].append(entry)
+            
+            # Garder seulement les 20 derniers
+            if len(self.stats["exercises_done"]) > 20:
+                self.stats["exercises_done"] = self.stats["exercises_done"][-20:]
         
         self.save()
     

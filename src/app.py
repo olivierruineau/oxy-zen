@@ -179,9 +179,12 @@ class OxyZenApp:
             self.preferences
         )
         
+        # Lock pour protéger les accès multi-threads
+        self._lock = threading.Lock()
+        
         self.running = True
-        self.paused = False
-        self.pause_until = None
+        self._paused = False
+        self._pause_until = None
         
         # Thread pour le scheduler
         self.schedule_thread = None
@@ -190,7 +193,7 @@ class OxyZenApp:
         self.icon = None
         
         # Dernière notification pour snooze
-        self.last_notification = None
+        self._last_notification = None
         
         # Liste des jobs de notification pour tracking
         self.notification_jobs = []
@@ -199,6 +202,42 @@ class OxyZenApp:
         self.idle_threshold = 300  # 5 minutes par défaut
         
         print("🧘 Oxy-Zen démarré!")
+    
+    @property
+    def paused(self) -> bool:
+        """Retourne l'état de pause de façon thread-safe."""
+        with self._lock:
+            return self._paused
+    
+    @paused.setter
+    def paused(self, value: bool):
+        """Définit l'état de pause de façon thread-safe."""
+        with self._lock:
+            self._paused = value
+    
+    @property
+    def pause_until(self):
+        """Retourne la date de fin de pause de façon thread-safe."""
+        with self._lock:
+            return self._pause_until
+    
+    @pause_until.setter
+    def pause_until(self, value):
+        """Définit la date de fin de pause de façon thread-safe."""
+        with self._lock:
+            self._pause_until = value
+    
+    @property
+    def last_notification(self):
+        """Retourne la dernière notification de façon thread-safe."""
+        with self._lock:
+            return self._last_notification
+    
+    @last_notification.setter
+    def last_notification(self, value):
+        """Définit la dernière notification de façon thread-safe."""
+        with self._lock:
+            self._last_notification = value
     
     def send_notification(self, category: str, message: str, exercise: str):
         """Envoie une notification Windows."""
