@@ -1,7 +1,7 @@
 """Fenêtre de configuration des notifications pour Oxy-Zen."""
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from typing import Callable, Dict
 
 class NotificationConfigWindow:
@@ -88,13 +88,61 @@ class NotificationConfigWindow:
         self.root.geometry(f"{w}x{h}+{x}+{y}")
 
     def save(self):
+        # Récupération des valeurs
+        start_hour = self.start_hour_var.get()
+        start_minute = self.start_minute_var.get()
+        end_hour = self.end_hour_var.get()
+        end_minute = self.end_minute_var.get()
+        
+        # Validation des heures (0-23)
+        if not (0 <= start_hour <= 23):
+            messagebox.showerror(
+                "Erreur de validation",
+                f"L'heure de début ({start_hour}) doit être entre 0 et 23."
+            )
+            return
+        
+        if not (0 <= end_hour <= 23):
+            messagebox.showerror(
+                "Erreur de validation",
+                f"L'heure de fin ({end_hour}) doit être entre 0 et 23."
+            )
+            return
+        
+        # Validation des minutes (0-59)
+        if not (0 <= start_minute <= 59):
+            messagebox.showerror(
+                "Erreur de validation",
+                f"Les minutes de début ({start_minute}) doivent être entre 0 et 59."
+            )
+            return
+        
+        if not (0 <= end_minute <= 59):
+            messagebox.showerror(
+                "Erreur de validation",
+                f"Les minutes de fin ({end_minute}) doivent être entre 0 et 59."
+            )
+            return
+        
+        # Validation que l'heure de début est avant l'heure de fin
+        start_total_minutes = start_hour * 60 + start_minute
+        end_total_minutes = end_hour * 60 + end_minute
+        
+        if start_total_minutes >= end_total_minutes:
+            messagebox.showerror(
+                "Erreur de validation",
+                f"L'heure de début ({start_hour:02d}:{start_minute:02d}) doit être avant l'heure de fin ({end_hour:02d}:{end_minute:02d})."
+            )
+            return
+        
+        # Si toutes les validations passent, enregistrer la configuration
         config = {
             "frequency": self.frequency_var.get(),
             "moment": self.moment_var.get(),
-            "start_hour": self.start_hour_var.get(),
-            "start_minute": self.start_minute_var.get(),
-            "end_hour": self.end_hour_var.get(),
-            "end_minute": self.end_minute_var.get(),
+            "start_hour": start_hour,
+            "start_minute": start_minute,
+            "end_hour": end_hour,
+            "end_minute": end_minute,
         }
         self.on_save(config)
         self.root.destroy()

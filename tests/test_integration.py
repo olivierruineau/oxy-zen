@@ -20,7 +20,7 @@ class TestEndToEndWorkflow:
         prefs.update_problem_areas(["dos", "yeux"])
         
         # 3. Créer un sélecteur
-        selector = ExerciseSelector(temp_exercises_file, prefs)
+        selector = ExerciseSelector(temp_exercises_file, prefs, temp_exercises_file.parent)
         
         # 4. Sélectionner quelques exercices
         for i in range(5):
@@ -74,7 +74,7 @@ class TestConfigurationPersistence:
         assert len(prefs2.stats["exercises_done"]) == 1
         
         # Créer un nouveau sélecteur avec les préférences chargées
-        selector = ExerciseSelector(temp_exercises_file, prefs2)
+        selector = ExerciseSelector(temp_exercises_file, prefs2, temp_exercises_file.parent)
         
         # Vérifier que la sélection fonctionne
         result = selector.select_next_exercise()
@@ -101,7 +101,7 @@ class TestWeightCalculationIntegration:
         prefs.problem_areas = ["dos"]
         prefs.calculate_weights()
         
-        selector = ExerciseSelector(temp_file, prefs)
+        selector = ExerciseSelector(temp_file, prefs, temp_file.parent)
         
         # Faire beaucoup de sélections
         categories = []
@@ -123,7 +123,7 @@ class TestWeightCalculationIntegration:
         prefs.problem_areas = ["dos"]
         prefs.calculate_weights()
         
-        selector = ExerciseSelector(temp_exercises_file, prefs)
+        selector = ExerciseSelector(temp_exercises_file, prefs, temp_exercises_file.parent)
         
         # Faire beaucoup de sélections
         categories = []
@@ -174,7 +174,7 @@ class TestExerciseHistoryIntegration:
         prefs = UserPreferences()
         prefs.update_problem_areas(["dos", "yeux"])
         
-        selector = ExerciseSelector(temp_exercises_file, prefs)
+        selector = ExerciseSelector(temp_exercises_file, prefs, temp_exercises_file.parent)
         
         # Simuler une journée de notifications
         for _ in range(10):
@@ -244,7 +244,7 @@ class TestEdgeCases:
         prefs.problem_areas = []
         prefs.calculate_weights()
         
-        selector = ExerciseSelector(temp_exercises_file, prefs)
+        selector = ExerciseSelector(temp_exercises_file, prefs, temp_exercises_file.parent)
         
         result = selector.select_next_exercise()
         assert result is not None
@@ -260,7 +260,7 @@ class TestEdgeCases:
         prefs.problem_areas = UserPreferences.CATEGORIES.copy()
         prefs.calculate_weights()
         
-        selector = ExerciseSelector(temp_exercises_file, prefs)
+        selector = ExerciseSelector(temp_exercises_file, prefs, temp_exercises_file.parent)
         
         # Devrait quand même fonctionner
         result = selector.select_next_exercise()
@@ -287,7 +287,7 @@ class TestEdgeCases:
         prefs.problem_areas = ["dos"]
         prefs.calculate_weights()
         
-        selector = ExerciseSelector(temp_file, prefs)
+        selector = ExerciseSelector(temp_file, prefs, tmp_path)
         
         # Faire plusieurs sélections - devrait toujours retourner le même
         results = [selector.select_next_exercise() for _ in range(5)]

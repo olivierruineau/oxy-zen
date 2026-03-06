@@ -90,7 +90,7 @@ class TestExerciseSelector:
     
     def test_init_loads_exercises(self, temp_exercises_file, clean_preferences):
         """Test que l'initialisation charge les exercices."""
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         
         assert "dos" in selector.exercises
         assert "yeux" in selector.exercises
@@ -99,7 +99,7 @@ class TestExerciseSelector:
     
     def test_load_exercises_success(self, temp_exercises_file, clean_preferences):
         """Test chargement réussi des exercices depuis YAML."""
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         
         assert selector.exercises is not None
         assert isinstance(selector.exercises, dict)
@@ -108,7 +108,7 @@ class TestExerciseSelector:
     def test_load_exercises_file_not_found(self, clean_preferences, tmp_path):
         """Test comportement quand le fichier n'existe pas."""
         non_existent = tmp_path / "non_existent.yaml"
-        selector = ExerciseSelector(non_existent, clean_preferences)
+        selector = ExerciseSelector(non_existent, clean_preferences, tmp_path)
         
         # Devrait avoir un fallback
         assert "prevention_globale" in selector.exercises
@@ -119,7 +119,7 @@ class TestExerciseSelector:
         with open(invalid_file, 'w') as f:
             f.write("{ invalid: yaml: content }")
         
-        selector = ExerciseSelector(invalid_file, clean_preferences)
+        selector = ExerciseSelector(invalid_file, clean_preferences, tmp_path)
         
         # Devrait avoir un fallback
         assert "prevention_globale" in selector.exercises
@@ -129,7 +129,7 @@ class TestExerciseSelector:
         clean_preferences.problem_areas = ["dos"]
         clean_preferences.calculate_weights()
         
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         result = selector.select_next_exercise()
         
         assert result is not None
@@ -146,7 +146,7 @@ class TestExerciseSelector:
         clean_preferences.problem_areas = ["dos"]
         clean_preferences.calculate_weights()
         
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         
         # Faire plusieurs sélections et vérifier qu'on a principalement des exercices "dos"
         categories = []
@@ -164,7 +164,7 @@ class TestExerciseSelector:
         clean_preferences.problem_areas = ["dos"]
         clean_preferences.calculate_weights()
         
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         
         # Faire 4 sélections consécutives
         messages = []
@@ -178,7 +178,7 @@ class TestExerciseSelector:
     
     def test_select_next_exercise_no_exercises(self, temp_exercises_file, clean_preferences):
         """Test comportement sans exercices disponibles."""
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         selector.exercises = {}  # Vider les exercices
         
         result = selector.select_next_exercise()
@@ -187,7 +187,7 @@ class TestExerciseSelector:
     
     def test_select_next_exercise_no_valid_weights(self, temp_exercises_file, clean_preferences):
         """Test comportement quand tous les poids sont à 0."""
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         
         # Mettre tous les poids à 0
         for key in selector.preferences.weights:
@@ -202,7 +202,7 @@ class TestExerciseSelector:
         clean_preferences.problem_areas = ["dos"]
         clean_preferences.calculate_weights()
         
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         
         # Initialiser le cache
         selector.recent_messages = []
@@ -222,7 +222,7 @@ class TestExerciseSelector:
         clean_preferences.problem_areas = ["dos", "yeux"]
         clean_preferences.calculate_weights()
         
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         
         # Faire plusieurs sélections
         categories = set()
@@ -236,7 +236,7 @@ class TestExerciseSelector:
     
     def test_preferences_integration(self, temp_exercises_file, clean_preferences):
         """Test que le sélecteur utilise bien les préférences."""
-        selector = ExerciseSelector(temp_exercises_file, clean_preferences)
+        selector = ExerciseSelector(temp_exercises_file, clean_preferences, temp_exercises_file.parent)
         
         # Vérifier que le sélecteur a bien les préférences
         assert selector.preferences is clean_preferences

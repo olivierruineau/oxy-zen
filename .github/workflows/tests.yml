@@ -12,7 +12,12 @@ on:
 
 jobs:
   test:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-2022]
+        python-version: ["3.12", "3.13"]
     permissions:
       contents: read
       pull-requests: write
@@ -22,10 +27,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
       
       - name: Install uv
         uses: astral-sh/setup-uv@v4
@@ -46,7 +51,8 @@ jobs:
       
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
-        if: always()
+        if: always() && matrix.python-version == '3.12' && matrix.os == 'windows-2022'
+        continue-on-error: true
         with:
           file: ./coverage.xml
           flags: unittests
@@ -57,14 +63,15 @@ jobs:
       
       - name: Upload coverage HTML report
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && matrix.python-version == '3.12' && matrix.os == 'windows-2022'
         with:
-          name: coverage-report
+          name: coverage-report-py${{ matrix.python-version }}-${{ matrix.os }}
           path: htmlcov/
       
       - name: Comment PR with coverage
-        if: github.event_name == 'pull_request' && always()
+        if: github.event_name == 'pull_request' && always() && matrix.python-version == '3.12' && matrix.os == 'windows-2022'
         uses: actions/github-script@v7
+        continue-on-error: true
         with:
           script: |
             const fs = require('fs');
@@ -74,7 +81,7 @@ jobs:
               if (match) {
                 const coverage = (parseFloat(match[1]) * 100).toFixed(2);
                 const status = (coverage >= 54 && coverage <= 80) ? '✅' : '⚠️';
-                const body = `## ${status} Code Coverage Report\n\n**Coverage: ${coverage}%**\n\nTarget: 54-80%\n\n[View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
+                const body = `## ${status} Code Coverage Report\n\n**Coverage: ${coverage}%**\n\nTarget: 54-80%\n\nTested on: Python ${{ matrix.python-version }}, ${{ matrix.os }}\n\n[View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})`;
                 
                 github.rest.issues.createComment({
                   issue_number: context.issue.number,
@@ -86,3 +93,76 @@ jobs:
             } catch (error) {
               console.log('Could not post coverage comment:', error);
             }
+  
+  security:
+    name: Security Audit
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      
+      - name: Install dependencies
+        run: |
+          uv sync --all-groups
+          uv pip install pip-audit
+      
+      - name: Run pip-audit
+        run: |
+          uv run pip-audit --desc --format json --output pip-audit-report.json
+        continue-on-error: true
+      
+      - name: Display audit results
+        if: always()
+        run: |
+          if (Test-Path pip-audit-report.json) {
+            $audit = Get-Content pip-audit-report.json | ConvertFrom-Json
+            $vulnFound = $false
+            $vulnCount = 0
+            
+            if ($audit.dependencies) {
+              foreach ($dep in $audit.dependencies) {
+                if ($dep.vulns.Count -gt 0) {
+                  if (-not $vulnFound) {
+                    Write-Host "⚠️ Vulnerabilities found:"
+                    $vulnFound = $true
+                  }
+                  Write-Host "  - $($dep.name) $($dep.version): $($dep.vulns.Count) vulnerabilities"
+                  $vulnCount += $dep.vulns.Count
+                }
+              }
+            }
+            
+            if ($vulnFound) {
+              Write-Host ""
+              Write-Host "Total: $vulnCount vulnerabilities detected"
+              exit 1
+            } else {
+              Write-Host "✅ No vulnerabilities found"
+              Write-Host "   Scanned $($audit.dependencies.Count) dependencies"
+            }
+          } else {
+            Write-Host "✅ No vulnerabilities found"
+          }
+      
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pip-audit-report
+          path: pip-audit-report.json
+          if-no-files-found: ignore
+

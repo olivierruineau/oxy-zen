@@ -1,0 +1,53 @@
+version: 2
+updates:
+  # Surveiller les dépendances pip
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    reviewers:
+      - "olivierruineau"
+    assignees:
+      - "olivierruineau"
+    # Grouper les mises à jour mineures et patch ensemble
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "pytest*"
+          - "pyinstaller"
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+    # Ignorer certaines dépendances si nécessaire
+    ignore:
+      # Exemple: ignorer les mises à jour majeures pour certains packages
+      # - dependency-name: "pillow"
+      #   update-types: ["version-update:semver-major"]
+  
+  # Surveiller les GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"
+    reviewers:
+      - "olivierruineau"

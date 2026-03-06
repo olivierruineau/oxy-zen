@@ -1,9 +1,15 @@
 """Module de gestion de la configuration utilisateur pour Oxy-Zen."""
 
 import json
+import os
+import threading
 from pathlib import Path
 from datetime import datetime
 from typing import List, Dict
+from src.logging_config import get_logger
+from src import constants
+
+logger = get_logger(__name__)
 
 
 class UserPreferences:
@@ -23,6 +29,9 @@ class UserPreferences:
     ]
     
     def __init__(self):
+        # Lock pour protéger les accès multi-threads
+        self._lock = threading.Lock()
+        
         self.problem_areas: List[str] = []
         self.last_checkin: str = ""
         self.weights: Dict[str, float] = {}
@@ -33,12 +42,12 @@ class UserPreferences:
         }
         # Ajout config notification (fréquence en minutes, moment en minutes)
         self.notification_config = {
-            "frequency": 30,  # par défaut toutes les 30 min
-            "moment": 0,      # par défaut à l'heure pile
-            "start_hour": 7,  # heure de début de travail
-            "start_minute": 30,
-            "end_hour": 16,   # heure de fin de travail
-            "end_minute": 0,
+            "frequency": constants.DEFAULT_NOTIFICATION_FREQUENCY,
+            "moment": constants.DEFAULT_NOTIFICATION_MOMENT,
+            "start_hour": constants.DEFAULT_START_HOUR,
+            "start_minute": constants.DEFAULT_START_MINUTE,
+            "end_hour": constants.DEFAULT_END_HOUR,
+            "end_minute": constants.DEFAULT_END_MINUTE,
         }
         # Créer le répertoire de config si nécessaire
         self.CONFIG_DIR.mkdir(parents=True, exist_ok=True)
@@ -64,19 +73,40 @@ class UserPreferences:
             self.calculate_weights()
     
     def save(self):
-        """Sauvegarde la configuration dans le fichier JSON."""
-        data = {
-            "problem_areas": self.problem_areas,
-            "last_checkin": self.last_checkin,
-            "weights": self.weights,
-            "stats": self.stats,
-            "notification_config": self.notification_config,
-        }
-        try:
-            with open(self.CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(data, f, indent=2, ensure_ascii=False)
-        except IOError as e:
-            print(f"Erreur lors de la sauvegarde de la config: {e}")
+        """Sauvegarde la configuration dans le fichier JSON de manière atomique."""
+        with self._lock:
+            data = {
+                "problem_areas": self.problem_areas,
+                "last_checkin": self.last_checkin,
+                "weights": self.weights,
+                "stats": self.stats,
+                "notification_config": self.notification_config,
+            }
+            
+            # Écriture atomique : écrire dans un fichier temporaire puis renommer
+            temp_file = self.CONFIG_FILE.with_suffix('.tmp')
+            
+            try:
+                # Étape 1 : Écrire dans le fichier temporaire
+                with open(temp_file, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, indent=2, ensure_ascii=False)
+                    # Forcer l'écriture sur disque avant le rename
+                    f.flush()
+                    os.fsync(f.fileno())
+                
+                # Étape 2 : Renommer atomiquement (remplace l'ancien fichier)
+                # os.replace() est atomique sur Windows, Linux et macOS
+                os.replace(temp_file, self.CONFIG_FILE)
+                
+            except (IOError, OSError) as e:
+                # Cleanup : supprimer le fichier temporaire en cas d'erreur
+                if temp_file.exists():
+                    try:
+                        temp_file.unlink()
+                    except OSError:
+                        pass  # Ignorer l'erreur de suppression
+                
+                logger.error(f"Erreur lors de la sauvegarde de la config: {e}", exc_info=True)
     
     def update_notification_config(self, config: Dict):
         """Met à jour la configuration des notifications et sauvegarde."""
@@ -106,20 +136,21 @@ class UserPreferences:
             self.weights["prevention_globale"] = 1.0
         else:
             # 70% réparti sur les zones à problème
-            problem_weight = 0.7 / len(self.problem_areas)
+            problem_weight = constants.PROBLEM_AREAS_WEIGHT / len(self.problem_areas)
             
             for cat in self.CATEGORIES:
                 if cat in self.problem_areas:
                     self.weights[cat] = problem_weight
                 else:
-                    self.weights[cat] = 0.01  # Petit poids résiduel
+                    self.weights[cat] = constants.RESIDUAL_WEIGHT  # Petit poids résiduel
             
             # 30% pour la prévention globale
-            self.weights["prevention_globale"] = 0.3
+            self.weights["prevention_globale"] = constants.PREVENTION_WEIGHT
     
     def increment_notification_count(self):
         """Incrémente le compteur de notifications envoyées."""
-        self.stats["total_notifications"] += 1
+        with self._lock:
+            self.stats["total_notifications"] += 1
         self.save()
     
     def add_exercise_to_history(self, category: str, message: str):
@@ -129,11 +160,12 @@ class UserPreferences:
             "category": category,
             "message": message,
         }
-        self.stats["exercises_done"].append(entry)
-        
-        # Garder seulement les 20 derniers
-        if len(self.stats["exercises_done"]) > 20:
-            self.stats["exercises_done"] = self.stats["exercises_done"][-20:]
+        with self._lock:
+            self.stats["exercises_done"].append(entry)
+            
+            # Garder seulement les N derniers
+            if len(self.stats["exercises_done"]) > constants.MAX_EXERCISE_HISTORY:
+                self.stats["exercises_done"] = self.stats["exercises_done"][-constants.MAX_EXERCISE_HISTORY:]
         
         self.save()
     
