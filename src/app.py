@@ -361,6 +361,7 @@ class OxyZenApp:
         
         thread = threading.Thread(target=run_checkin, daemon=True)
         thread.start()
+        return thread
     
     def show_stats(self):
         """Affiche la fenêtre de statistiques."""
@@ -371,6 +372,7 @@ class OxyZenApp:
         
         thread = threading.Thread(target=run_stats, daemon=True)
         thread.start()
+        return thread
     
     def setup_schedule(self):
         """Configure les tâches planifiées."""
