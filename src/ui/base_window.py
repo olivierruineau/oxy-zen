@@ -70,7 +70,10 @@ class BaseWindow:
         self.root.attributes('-topmost', True)
         self.root.after(100, lambda: self.root.attributes('-topmost', False))
         
-        _set_window_icon(self):
+        # Gérer la fermeture avec la croix
+        self.root.protocol("WM_DELETE_WINDOW", self.close)
+    
+    def _set_window_icon(self):
         """Définit l'icône de la fenêtre à partir du fichier icon.ico."""
         try:
             base_path = get_base_path()
@@ -84,9 +87,6 @@ class BaseWindow:
         except Exception:
             # Ignorer silencieusement les erreurs d'icône (non critique)
             pass
-    
-    def # Gérer la fermeture avec la croix
-        self.root.protocol("WM_DELETE_WINDOW", self.close)
     
     def center_window(self):
         """Centre la fenêtre sur l'écran."""
