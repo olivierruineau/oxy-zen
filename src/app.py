@@ -498,9 +498,54 @@ class OxyZenApp:
         if self.icon:
             self.icon.stop()
     
+    def get_icon_path(self) -> Optional[Path]:
+        """
+        Retourne le chemin vers l'icône, compatible PyInstaller.
+        
+        Returns:
+            Path vers icon.png ou None si introuvable
+        """
+        # Essayer depuis assets/ (mode développement et PyInstaller)
+        base_path = get_base_path()
+        icon_path = base_path / 'assets' / 'icon.png'
+        
+        if icon_path.exists():
+            return icon_path
+        
+        # Fallback si fichier manquant
+        logger.warning(f"Icône introuvable: {icon_path}")
+        return None
+    
     def create_icon_image(self):
-        """Crée une image d'icône simple."""
-        # Créer une image avec un cercle et "OZ"
+        """
+        Charge l'icône depuis le fichier ou crée une icône par défaut.
+        
+        Returns:
+            Image PIL pour l'icône system tray
+        """
+        # Essayer de charger l'icône depuis le fichier
+        icon_path = self.get_icon_path()
+        
+        if icon_path and icon_path.exists():
+            try:
+                logger.info(f"Chargement icône depuis: {icon_path}")
+                img = Image.open(icon_path)
+                
+                # Redimensionner si nécessaire (tray icons = 64x64)
+                if img.size != (constants.ICON_SIZE, constants.ICON_SIZE):
+                    img = img.resize(
+                        (constants.ICON_SIZE, constants.ICON_SIZE),
+                        Image.Resampling.LANCZOS
+                    )
+                
+                return img
+                
+            except Exception as e:
+                logger.error(f"Erreur chargement icône: {e}", exc_info=True)
+                # Continuer vers fallback
+        
+        # Fallback: Créer icône programmatiquement (ancien code)
+        logger.info("Création icône par défaut (fallback)")
         img = Image.new('RGB', (constants.ICON_SIZE, constants.ICON_SIZE), color='#3498db')
         draw = ImageDraw.Draw(img)
         

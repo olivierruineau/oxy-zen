@@ -1,8 +1,21 @@
 """Fenêtre de configuration des notifications pour Oxy-Zen."""
 
+import sys
 import tkinter as tk
 from tkinter import ttk, messagebox
+from pathlib import Path
 from typing import Callable, Dict
+
+
+def get_base_path() -> Path:
+    """
+    Retourne le chemin de base de l'application.
+    Gère à la fois le mode développement et l'exécutable PyInstaller.
+    """
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return Path(sys._MEIPASS)
+    else:
+        return Path(__file__).parent.parent.parent
 
 class NotificationConfigWindow:
     """Fenêtre pour configurer les notifications."""
@@ -28,6 +41,9 @@ class NotificationConfigWindow:
         self.root.title("Configuration des notifications")
         self.root.geometry("450x500")
         self.root.resizable(False, False)
+        
+        # Définir l'icône
+        self._set_window_icon()
         self.frequency_var = tk.IntVar(value=self.current_config.get("frequency", 30))
         self.moment_var = tk.IntVar(value=self.current_config.get("moment", 0))
         self.start_hour_var = tk.IntVar(value=self.current_config.get("start_hour", 7))
@@ -38,6 +54,16 @@ class NotificationConfigWindow:
         self.center_window()
         self.root.mainloop()
 
+    def _set_window_icon(self):
+        """Définit l'icône de la fenêtre à partir du fichier icon.ico."""
+        try:
+            base_path = get_base_path()
+            icon_path = base_path / 'assets' / 'icon.ico'
+            if icon_path.exists():
+                self.root.iconbitmap(str(icon_path))
+        except Exception:
+            pass
+    
     def build_ui(self):
         frame = ttk.Frame(self.root, padding=20)
         frame.pack(fill=tk.BOTH, expand=True)

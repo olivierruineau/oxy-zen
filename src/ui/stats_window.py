@@ -1,9 +1,22 @@
 """Fenêtre de statistiques pour Oxy-Zen."""
 
+import sys
 import tkinter as tk
 from tkinter import ttk
+from pathlib import Path
 from datetime import datetime
 from typing import Dict
+
+
+def get_base_path() -> Path:
+    """
+    Retourne le chemin de base de l'application.
+    Gère à la fois le mode développement et l'exécutable PyInstaller.
+    """
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        return Path(sys._MEIPASS)
+    else:
+        return Path(__file__).parent.parent.parent
 
 
 class StatsWindow:
@@ -24,6 +37,9 @@ class StatsWindow:
         self.root.geometry("400x550")
         self.root.resizable(False, False)
         
+        # Définir l'icône
+        self._set_window_icon()
+        
         # Centrer la fenêtre
         self.center_window()
         
@@ -38,6 +54,16 @@ class StatsWindow:
         
         # Focus sur la fenêtre
         self.root.focus_force()
+    
+    def _set_window_icon(self):
+        """Définit l'icône de la fenêtre à partir du fichier icon.ico."""
+        try:
+            base_path = get_base_path()
+            icon_path = base_path / 'assets' / 'icon.ico'
+            if icon_path.exists():
+                self.root.iconbitmap(str(icon_path))
+        except Exception:
+            pass
     
     def center_window(self):
         """Centre la fenêtre sur l'écran."""
