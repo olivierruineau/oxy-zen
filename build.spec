@@ -14,6 +14,7 @@ block_cipher = None
 # Données à inclure dans l'exécutable
 datas = [
     ('data/exercises.yaml', 'data'),  # Fichier YAML des exercices
+    ('assets/icon.png', 'assets'),    # Icône pour system tray
 ]
 
 # Imports cachés (modules non détectés automatiquement)
@@ -68,6 +69,6 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # TODO: ajouter assets/icon.ico
+    icon='assets/icon.ico',             # Icône de l'exécutable Windows
     version_file='version_info.txt',  # Métadonnées Windows
 )

@@ -1,8 +1,23 @@
 """Classe de base pour les fenêtres tkinter de l'application Oxy-Zen."""
 
+import sys
 import tkinter as tk
 from tkinter import ttk
+from pathlib import Path
 from typing import Optional, Tuple
+
+
+def get_base_path() -> Path:
+    """
+    Retourne le chemin de base de l'application.
+    Gère à la fois le mode développement et l'exécutable PyInstaller.
+    """
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # Mode PyInstaller : sys._MEIPASS est le dossier temporaire d'extraction
+        return Path(sys._MEIPASS)
+    else:
+        # Mode développement : utilise le chemin du fichier
+        return Path(__file__).parent.parent.parent
 
 
 class BaseWindow:
@@ -39,6 +54,9 @@ class BaseWindow:
         self.root.geometry(f"{width}x{height}")
         self.root.resizable(resizable, resizable)
         
+        # Définir l'icône de la fenêtre
+        self._set_window_icon()
+        
         # Centrer la fenêtre
         self.center_window()
         
@@ -54,6 +72,21 @@ class BaseWindow:
         
         # Gérer la fermeture avec la croix
         self.root.protocol("WM_DELETE_WINDOW", self.close)
+    
+    def _set_window_icon(self):
+        """Définit l'icône de la fenêtre à partir du fichier icon.ico."""
+        try:
+            base_path = get_base_path()
+            icon_path = base_path / 'assets' / 'icon.ico'
+            
+            if icon_path.exists():
+                self.root.iconbitmap(str(icon_path))
+            else:
+                # Pas d'erreur si l'icône n'existe pas, utiliser l'icône par défaut
+                pass
+        except Exception:
+            # Ignorer silencieusement les erreurs d'icône (non critique)
+            pass
     
     def center_window(self):
         """Centre la fenêtre sur l'écran."""

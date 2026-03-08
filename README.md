@@ -1,6 +1,25 @@
 # 🧘 Oxy-Zen
 
+[![Python Version](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/downloads/)
+[![Tests](https://img.shields.io/badge/tests-220%20passing-success)](tests/)
+[![Coverage](https://img.shields.io/badge/coverage-75%25-brightgreen)](htmlcov/index.html)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Security: A+](https://img.shields.io/badge/security-A%2B-brightgreen)](SECURITY_REVIEW.md)
+
 Application de rappels d'exercices adaptatifs pour ta journée de travail. Parce que ton corps mérite mieux qu'une vie de statue! 🗿
+
+---
+
+## 📚 Documentation
+
+- 📖 **[Guide d'Architecture](docs/architecture.md)** - Documentation technique complète
+- 🤝 **[Guide de Contribution](CONTRIBUTING.md)** - Comment contribuer au projet
+- 🗺️ **[Roadmap](ROADMAP.md)** - Plan d'évolution et futures fonctionnalités
+- 🔒 **[Revue de Sécurité](SECURITY_REVIEW.md)** - Audit de sécurité (Note A+)
+- 📝 **[Changelog](CHANGELOG.md)** - Historique des versions
+- ✅ **[TODO](TODO.md)** - Tâches en cours et planifiées
+
+---
 
 ## 🎯 Fonctionnalités
 
@@ -420,9 +439,9 @@ Exemple : Si tu coches "Dos" et "Yeux"
 - Prévention globale : 30% de chances
 - Autres catégories : ~1% chacune
 
-## � Tests
+## 🧪 Tests
 
-Le projet utilise `pytest` pour garantir la qualité du code avec des tests unitaires et d'intégration.
+Le projet utilise `pytest` pour garantir la qualité du code avec une suite complète de tests unitaires et d'intégration.
 
 ### Lancer les tests
 
@@ -434,33 +453,81 @@ uv sync --all-groups
 uv run pytest
 
 # Avec rapport de couverture
-uv run pytest --cov=src --cov-report=term-missing
+uv run pytest --cov=src --cov-report=html
+# Puis ouvrir htmlcov/index.html dans un navigateur
 ```
 
-### Couverture de code
+### Couverture de code (v0.2.0)
 
-- **Couverture totale : ~55-60%**
-- `src/config.py` : 97% ✅
-- `src/app.py` : 72% ✅
-- `src/ui/*` : 15-20% (tests manuels recommandés)
+- **Couverture totale : 75%** ✅ (objectif atteint!)
+- **Total tests : 220** passing
+- `src/app.py` : 87% ✅
+- `src/config.py` : 98% ✅
+- `src/security.py` : 95% ✅
+- `src/ui/checkin_window.py` : 88% ✅
+- `src/ui/stats_window.py` : 93% ✅
+- `src/ui/notification_config_window.py` : 99% ✅
+
+**Suites de tests:**
+- `tests/test_app.py` - Logique application principale
+- `tests/test_config.py` - Configuration et persistance
+- `tests/test_security.py` - Validation sécurité
+- `tests/test_ui.py` - Composants interface utilisateur
+- `tests/test_system_tray.py` - Icône système
+- `tests/test_notifications.py` - Envoi notifications
+- `tests/test_schedule.py` - Logique de planning
+- `tests/test_threads.py` - Gestion threads
+- `tests/test_thread_safety.py` - Concurrence et locks
+- `tests/test_atomic_config_write.py` - Écriture atomique
 
 ### CI/CD
 
-Les tests s'exécutent automatiquement sur chaque Pull Request vers `main` :
-- Validation de la couverture (objectif : 60-80%)
+Les tests s'exécutent automatiquement sur chaque Pull Request vers `master` via GitHub Actions:
+- Tests sur Python 3.12 et 3.13
+- Tests sur Windows Server 2019 et 2022
+- Validation de la couverture (objectif : 75%+)
+- Security audit avec pip-audit
 - Rapport automatique dans les commentaires PR
 - Configuration : [.github/workflows/tests.yml](.github/workflows/tests.yml)
 
 Pour plus de détails, voir [tests/README.md](tests/README.md).
 
-## �🤝 Contribution
+---
 
-Tu veux ajouter tes propres messages sarcastiques ? Édite `exercises.yaml` et partage tes meilleures répliques! 😄
+## 🤝 Contribution
 
-## 📜 Licence
+Contributions bienvenues! Ce projet est ouvert à la communauté.
 
-Ce projet est libre d'utilisation. Prends soin de toi! 💪
+### Comment Contribuer
+
+1. 📖 Lisez le **[Guide de Contribution](CONTRIBUTING.md)** complet
+2. 🐛 Reportez des bugs ou 💡 proposez des features via [Issues](https://github.com/olivierruineau/oxy-zen/issues)
+3. 🔀 Soumettez des Pull Requests
+
+### Tu veux ajouter tes propres messages sarcastiques ?
+
+Édite [`data/exercises.yaml`](data/exercises.yaml) et partage tes meilleures répliques! 😄
+
+Voir le schéma dans [CONTRIBUTING.md](CONTRIBUTING.md#standards-de-code) pour la structure attendue.
 
 ---
 
-**Rappel** : Cette application ne remplace pas un avis médical. Si tu as des douleurs persistantes, consulte un professionnel de santé. 🏥
+## 📜 Licence
+
+Ce projet est sous licence **MIT** - voir le fichier [LICENSE](LICENSE) pour les détails.
+
+En résumé: libre d'utilisation, modification et distribution. 💪
+
+---
+
+## 🙏 Remerciements
+
+Merci à tous les contributeurs qui rendent Oxy-Zen meilleur!
+
+---
+
+**⚠️ Rappel Santé**: Cette application ne remplace pas un avis médical. Si tu as des douleurs persistantes, consulte un professionnel de santé. 🏥
+
+---
+
+*Oxy-Zen v0.2.0 - Prends soin de toi! 🧘*

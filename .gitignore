@@ -20,4 +20,4 @@ coverage.xml
 .coverage
 
 # Oxy-Zen specific
-icon.png
+# (les icônes dans assets/ sont versionnées)

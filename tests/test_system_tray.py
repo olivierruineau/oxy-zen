@@ -29,8 +29,10 @@ class TestSystemTrayIcon:
         # Créer l'app
         app = OxyZenApp()
         
-        # Créer l'icône
-        icon_img = app.create_icon_image()
+        # Mocker get_icon_path pour forcer le fallback programmatique
+        with patch.object(app, 'get_icon_path', return_value=None):
+            # Créer l'icône
+            icon_img = app.create_icon_image()
         
         # Vérifier que Image.new a été appelé avec les bons paramètres
         mock_image.new.assert_called_once()
